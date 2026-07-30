@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+.next/
+dist/
+out/
+build/
+
+# Vercel
+.vercel/
+
+# Environment Variables
+.env
+.env*.local
+.env.production
+
+# Temp and OS files
+*.pdf
+*.zip
+*.log
+.DS_Store
+Thumbs.db
+
+# Fallback DB temporary state
+db_fallback.json
