@@ -1146,3 +1146,7 @@ footer strong {
     font-size: 11px;
   }
 }
+
+/* Anchor navigation: target tidak ketutup navbar sticky + halus */
+html { scroll-behavior: smooth; }
+section[id] { scroll-margin-top: 92px; }

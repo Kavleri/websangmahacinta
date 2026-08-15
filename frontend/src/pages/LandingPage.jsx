@@ -5,7 +5,7 @@ import { CheckCircle2, Users, BookOpen, Heart, ShieldAlert, Calendar, Clock, Map
 import { API_BASE } from "../apiConfig";
 
 const WAR_INFO = {
-  economy: { label: "Economy Seat", zone: "Barisan Belakang", color: "#10b981", schedule: "17 – 20 Agustus 2026", openAt: "17 Agustus 2026, 00.00 WIB" },
+  economy: { label: "Economy Seat", zone: "Barisan Belakang", color: "#10b981", schedule: "16 – 20 Agustus 2026", openAt: "16 Agustus 2026, 00.00 WIB" },
   reguler: { label: "Reguler Seat", zone: "Barisan Tengah", color: "#2563eb", schedule: "21 – 24 Agustus 2026", openAt: "21 Agustus 2026, 00.00 WIB" },
   premium: { label: "Premium Seat", zone: "Barisan Paling Depan", color: "#f59e0b", schedule: "25 – 28 Agustus 2026", openAt: "25 Agustus 2026, 00.00 WIB" }
 };
@@ -29,28 +29,64 @@ export default function LandingPage({ onSelectPackage, setPage }) {
   const [seatPick, setSeatPick] = useState(null);
   const [seatSel, setSeatSel] = useState([]);
   const [seatError, setSeatError] = useState(null);
+  const [usingCache, setUsingCache] = useState(false);
 
-  const loadPackages = () => {
-    fetch(`${API_BASE}/api/packages`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Gagal mengambil data paket.");
-        return res.json();
-      })
-      .then((data) => {
-        setPackages(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+  const CACHE_KEY = "dutaqu_packages_cache_v1";
+
+  // Ambil data paket dengan retry (tahan cold-start/server hiccup) + fallback cache terakhir
+  const loadPackages = async ({ quiet = false } = {}) => {
+    if (!quiet) { setLoading(true); setError(null); }
+    const attempt = async () => {
+      const res = await fetch(`${API_BASE}/api/packages`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`Server merespons ${res.status}`);
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) throw new Error("Data paket kosong dari server.");
+      return data;
+    };
+    try {
+      let data = null;
+      let lastErr = null;
+      for (let i = 0; i < 3; i++) {
+        try { data = await attempt(); break; } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, i === 0 ? 900 : 2500)); }
+      }
+      if (!data) throw lastErr || new Error("Gagal terhubung ke server.");
+      setPackages(data);
+      setUsingCache(false);
+      setError(null);
+      setLoading(false);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), data })); } catch (e) { /* storage penuh/di-private: abaikan */ }
+    } catch (err) {
+      // Fallback terakhir: pakai cache agar halaman tetap hidup
+      try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+        if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
+          setPackages(cached.data);
+          setUsingCache(true);
+          setError(null);
+        } else {
+          setError("Koneksi ke server tiket terganggu. Periksa internet Anda lalu coba lagi.");
+        }
+      } catch (e) {
+        setError("Koneksi ke server tiket terganggu. Periksa internet Anda lalu coba lagi.");
+      }
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
+    // Render dari cache dulu (instan), lalu segarkan langsung
+    try {
+      const cached = JSON.parse(localStorage.getItem("dutaqu_packages_cache_v1") || "null");
+      if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
+        setPackages(cached.data);
+        setUsingCache(true);
+        setLoading(false);
+      }
+    } catch (e) { /* abaikan */ }
     loadPackages();
     // Jam live (untuk gate war tiket) + refresh ketersediaan seat tiap 60 detik
     const clock = setInterval(() => setNowMs(Date.now()), 1000);
-    const poll = setInterval(loadPackages, 60000);
+    const poll = setInterval(() => loadPackages({ quiet: true }), 60000);
     return () => { clearInterval(clock); clearInterval(poll); };
   }, []);
 
@@ -560,13 +596,20 @@ export default function LandingPage({ onSelectPackage, setPage }) {
           )}
 
           {error && (
-            <div className="glass-card" style={{ maxWidth: "500px", margin: "0 auto", padding: "24px", borderColor: "#fca5a5", background: "rgba(254, 226, 226, 0.8)", display: "flex", alignItems: "center", gap: "12px" }}>
-              <ShieldAlert className="text-danger" style={{ color: "#dc2626" }} size={28} />
-              <div style={{ textAlign: "left" }}>
-                <p style={{ fontWeight: 700, color: "#991b1b" }}>Error</p>
-                <p style={{ fontSize: "14px", color: "#b91c1c" }}>{error}</p>
-              </div>
+            <div className="glass-card" style={{ maxWidth: "560px", margin: "0 auto", padding: "28px", borderColor: "#fca5a5", background: "rgba(254, 226, 226, 0.9)", textAlign: "center" }}>
+              <ShieldAlert style={{ color: "#dc2626", marginBottom: "10px" }} size={34} />
+              <p style={{ fontWeight: 800, color: "#991b1b", marginBottom: "6px" }}>Gagal Memuat Tiket</p>
+              <p style={{ fontSize: "14px", color: "#b91c1c", marginBottom: "16px" }}>{error}</p>
+              <button className="btn btn-primary" onClick={() => loadPackages()} style={{ padding: "10px 24px" }}>
+                🔄 Coba Lagi
+              </button>
             </div>
+          )}
+
+          {!loading && !error && usingCache && (
+            <p style={{ textAlign: "center", fontSize: "12.5px", color: "#b45309", background: "rgba(245, 158, 11, 0.12)", borderRadius: "999px", padding: "6px 16px", maxWidth: "fit-content", margin: "0 auto 20px auto" }}>
+              ⚠️ Menampilkan data cadangan — menunggu koneksi ke server tiket...
+            </p>
           )}
 
           {!loading && !error && (
@@ -742,6 +785,42 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                     selected={seatPick ? seatSel : []}
                     onSeatClick={handleSeatClick}
                   />
+                </div>
+              </div>
+
+              {/* Video & Foto Ruangan Asli (Masjid At-Tohir) */}
+              <div style={{ maxWidth: "860px", margin: "56px auto 0 auto" }}>
+                <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                  <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", color: "var(--color-primary)", fontWeight: 700 }}>
+                    Intip Suasana Aula Asli — Masjid At-Tohir
+                  </h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "6px" }}>
+                    Inilah ruangan asli tempat seminar digelar. Denah 3D di atas dibuat persis mengikuti aula ini.
+                  </p>
+                </div>
+
+                <div className="glass-card" style={{ background: "rgba(255,255,255,0.95)", padding: "14px" }}>
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/room-tour.jpg"
+                    style={{ width: "100%", borderRadius: "12px", display: "block", background: "#0b1526" }}
+                  >
+                    <source src="/room-tour.mp4" type="video/mp4" />
+                    Browser kamu belum mendukung pemutaran video.
+                  </video>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", marginTop: "12px" }}>
+                    {["/aula/aula-1.jpg", "/aula/aula-2.jpg", "/aula/aula-3.jpg"].map((src, i) => (
+                      <img
+                        key={src}
+                        src={src}
+                        alt={`Suasana aula Masjid At-Tohir ${i + 1}`}
+                        loading="lazy"
+                        style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: "10px", border: "1px solid rgba(12,36,80,0.08)" }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </React.Fragment>
