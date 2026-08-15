@@ -60,16 +60,23 @@ export default function LandingPage({ onSelectPackage, setPage }) {
   const categoryStats = {};
   for (const cat of CATEGORY_ORDER) {
     const personal = byCategory[cat].personal;
-    categoryStats[cat] = personal
-      ? {
-          total: personal.seats_total ?? 100,
-          taken: personal.seats_taken ?? 0,
-          remaining: personal.seats_remaining ?? 100,
-          isReleased: personal.is_released ?? true,
-          releasedAtMs: personal.released_at ? Date.parse(personal.released_at) : 0,
-          warEndsMs: personal.war_ends_at ? Date.parse(personal.war_ends_at) : 0
-        }
-      : null;
+    if (personal) {
+      const total = personal.seats_total ?? 100;
+      const taken = Math.min(personal.seats_taken ?? 0, total);
+      const pending = Math.min(personal.seats_pending ?? 0, taken);
+      categoryStats[cat] = {
+        total,
+        taken,
+        pending,
+        paid: Math.min(personal.seats_paid ?? Math.max(0, taken - pending), total),
+        remaining: personal.seats_remaining ?? Math.max(0, total - taken),
+        isReleased: personal.is_released ?? true,
+        releasedAtMs: personal.released_at ? Date.parse(personal.released_at) : 0,
+        warEndsMs: personal.war_ends_at ? Date.parse(personal.war_ends_at) : 0
+      };
+    } else {
+      categoryStats[cat] = null;
+    }
   }
 
   return (

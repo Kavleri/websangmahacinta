@@ -530,18 +530,23 @@ export default function AdminConsole() {
       .reduce((sum, r) => sum + parseFloat(r.total_price || 0), 0),
   };
 
-  // Ringkasan kuota seat per kategori (war tiket)
+  // Ringkasan kuota seat per kategori (war tiket) — 3 status: terisi (lunas) / booking (pending) / kosong
   const seatCategories = ["economy", "reguler", "premium"]
     .map((cat) => {
       const p = packages.find((x) => x.category === cat && x.seat_type === "personal");
       if (!p) return null;
+      const total = p.seats_total ?? 100;
+      const taken = Math.min(p.seats_taken ?? 0, total);
+      const pending = Math.min(p.seats_pending ?? 0, taken);
       return {
         category: cat,
         label: cat.charAt(0).toUpperCase() + cat.slice(1),
-        total: p.seats_total ?? 100,
-        taken: p.seats_taken ?? 0,
-        remaining: p.seats_remaining ?? 100,
-        pending: p.seats_pending ?? 0,
+        total,
+        taken,
+        pending,
+        paid: Math.min(p.seats_paid ?? Math.max(0, taken - pending), total),
+        free: Math.max(0, total - taken),
+        remaining: p.seats_remaining ?? Math.max(0, total - taken),
         isReleased: p.is_released ?? true,
       };
     })
@@ -763,32 +768,44 @@ export default function AdminConsole() {
         </div>
       </div>
 
-      {/* Ringkasan Kuota Seat per Kategori (War Tiket) */}
+      {/* Ringkasan Status Seat per Kategori (kontrol manual via verifikasi pembayaran) */}
       {seatCategories.length > 0 && (
         <div className="glass-card" style={{ background: "rgba(255,255,255,0.9)", borderRadius: "16px", padding: "20px", marginBottom: "32px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
-            <strong style={{ color: "var(--color-primary)", fontSize: "15px" }}>Kuota Seat per Kategori (War Tiket)</strong>
+            <strong style={{ color: "var(--color-primary)", fontSize: "15px" }}>Status Seat per Kategori (Kontrol Manual)</strong>
             <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-              Seat terpakai = pending + lunas • Tolak pembayaran invalid agar seat kembali
+              Verifikasi = kursi jadi <b style={{ color: "#16a34a" }}>terisi</b> • Tolak = kursi kembali <b style={{ color: "#475569" }}>kosong</b>
             </span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
+          <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap", fontSize: "11.5px", color: "var(--text-muted)", marginBottom: "12px" }}>
+            <span><i style={{ display: "inline-block", width: 12, height: 8, borderRadius: 2, background: "#a78bfa", marginRight: 4 }} />Booking (menunggu verifikasi)</span>
+            <span><i style={{ display: "inline-block", width: 12, height: 8, borderRadius: 2, background: "linear-gradient(180deg,#86efac,#16a34a)", marginRight: 4 }} />Terisi (lunas)</span>
+            <span><i style={{ display: "inline-block", width: 12, height: 8, borderRadius: 2, background: "#e2e8f0", border: "1px solid #cbd5e1", marginRight: 4 }} />Kosong</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "12px" }}>
             {seatCategories.map((c) => {
-              const pct = Math.max(0, Math.min(100, Math.round((c.remaining / c.total) * 100)));
               const color = c.category === "premium" ? "#f59e0b" : c.category === "reguler" ? "#2563eb" : "#10b981";
+              const pct = (v) => `${Math.max(0, Math.min(100, (v / c.total) * 100))}%`;
               return (
                 <div key={c.category} style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "12px", padding: "14px", background: "white" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                     <strong style={{ fontSize: "13.5px", color: "var(--color-primary)" }}>
                       {c.label} Seat {!c.isReleased && <span title="Belum dibuka">(🔒 belum dibuka)</span>}
                     </strong>
-                    <span style={{ fontSize: "12.5px", fontWeight: 800, color: c.remaining <= 0 ? "#dc2626" : color }}>
-                      {c.remaining}/{c.total}
+                    <span style={{ fontSize: "12.5px", fontWeight: 800, color: c.free <= 0 ? "#dc2626" : color }}>
+                      sisa {c.free}/{c.total}
                     </span>
                   </div>
-                  <div className="quota-bar"><span style={{ width: `${pct}%`, background: color }} /></div>
-                  <p style={{ fontSize: "11.5px", color: "var(--text-muted)", marginTop: "6px" }}>
-                    {c.taken} seat terpakai • {c.pending} pending verifikasi
+                  {/* bar 3 status */}
+                  <div style={{ display: "flex", height: "10px", borderRadius: "999px", overflow: "hidden", background: "#eef2f7", border: "1px solid rgba(0,0,0,0.05)" }}>
+                    <span title={`${c.pending} booking`} style={{ width: pct(c.pending), background: "#a78bfa" }} />
+                    <span title={`${c.paid} terisi`} style={{ width: pct(c.paid), background: `linear-gradient(180deg, ${color}cc, ${color})` }} />
+                    <span title={`${c.free} kosong`} style={{ flex: 1, background: "#e2e8f0" }} />
+                  </div>
+                  <p style={{ fontSize: "11.5px", color: "var(--text-muted)", marginTop: "7px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                    <span><b style={{ color: "#7c3aed" }}>{c.pending}</b> booking</span>
+                    <span><b style={{ color }}>{c.paid}</b> terisi</span>
+                    <span><b>{c.free}</b> kosong</span>
                   </p>
                 </div>
               );

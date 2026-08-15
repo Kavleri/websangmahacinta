@@ -1,136 +1,125 @@
 import React from "react";
 
 /**
- * SeatMap3D — Peta kursi aula 3D (CSS murni, tanpa gambar/library)
- * Mengikuti layout asli aula 300 seat (theater mode):
- * - Panggung di sisi depan
- * - Premium (emas) 100 seat paling dekat panggung
- * - Reguler (biru) 100 seat di tengah
- * - Economy (hijau) 100 seat paling belakang
- * - Lorong tengah membagi tiap zona jadi kiri-kanan
- * - 4 tiang struktural di kiri-kanan aula
- * - Pintu masuk utama di sisi belakang (dekat economy)
+ * SeatMap3D — Peta kursi aula 3D (CSS murni), dilihat dari pintu masuk ke arah panggung.
+ * Layout aula 300 seat (theater): panggung depan, Premium (emas) 100 seat paling depan,
+ * Reguler (biru) 100 seat tengah, Economy (hijau) 100 seat belakang, lorong tengah,
+ * 4 tiang struktural, pintu masuk utama di sisi belakang.
+ *
+ * Status kursi (pembayaran manual, diverifikasi admin):
+ * - terisi  (paid)   : solid warna zona + glow
+ * - booking (pending): ungu (menunggu verifikasi pembayaran)
+ * - kosong           : kursi putih
  */
 const ZONES = [
-  { cat: "premium", label: "Premium", color: "#f59e0b", dark: "#b45309", rows: 5, perRow: 20 },
-  { cat: "reguler", label: "Reguler", color: "#2563eb", dark: "#1d4ed8", rows: 5, perRow: 20 },
-  { cat: "economy", label: "Economy", color: "#10b981", dark: "#047857", rows: 5, perRow: 20 }
+  { cat: "premium", label: "PREMIUM", color: "#f59e0b", dark: "#b45309" },
+  { cat: "reguler", label: "REGULER", color: "#2563eb", dark: "#1d4ed8" },
+  { cat: "economy", label: "ECONOMY", color: "#10b981", dark: "#047857" }
 ];
+const ROWS = 5;        // baris per zona
+const PER_ROW = 20;    // 10 kiri + 10 kanan (dipisah lorong tengah)
+const ZONE_TOP = [13, 41, 69];  // posisi awal tiap zona (% dari world)
+const ZONE_H = 26;     // tinggi zona (%)
+
+// Grid kursi di dalam zona (% dari zona): 2 blok 10 kolom + lorong tengah
+function seatPos(col, row) {
+  const x = col < 10 ? 4 + col * 3.2 : 63 + (col - 10) * 3.2;
+  const y = 13 + row * 17;
+  return { x, y };
+}
 
 export default function SeatMap3D({ categoryStats }) {
   const stat = (cat) => {
-    const st = categoryStats[cat] || { total: 100, taken: 0, remaining: 100 };
-    const taken = Math.min(st.taken || 0, st.total);
-    return { ...st, taken };
+    const s = categoryStats[cat] || {};
+    const total = s.total ?? 100;
+    const taken = Math.min(s.taken ?? 0, total);
+    const paid = Math.min(s.paid ?? taken, total);
+    const pending = Math.min(s.pending ?? 0, total - paid);
+    return { total, taken, paid, pending, free: Math.max(0, total - paid - pending) };
   };
 
   return (
     <div className="seat3d-wrap">
-      {/* Lampu atmosfer aula */}
-      <div className="seat3d-glow seat3d-glow-l" />
-      <div className="seat3d-glow seat3d-glow-r" />
-
       <div className="seat3d-scene">
         <div className="seat3d-world">
 
-          {/* ===== PLAFON LENTERA (khas aula masjid) ===== */}
-          <div className="seat3d-dome">
-            <div className="seat3d-dome-top" />
-            <div className="seat3d-dome-light" />
-          </div>
-
-          {/* ===== DINDING BELAKANG + PANGGUNG ===== */}
+          {/* Dinding belakang + kubah + mihrab */}
           <div className="seat3d-backwall">
             <div className="seat3d-mihrab" />
           </div>
+          <div className="seat3d-dome" />
+
+          {/* Panggung */}
           <div className="seat3d-stage">
             <div className="seat3d-stage-top" />
-            <div className="seat3d-stage-face">
-              <span>PANGGUNG</span>
-            </div>
-            <div className="seat3d-stage-skirt" />
+            <div className="seat3d-stage-face"><span>PANGGUNG</span></div>
           </div>
 
-          {/* ===== 4 TIANG STRUKTURAL ===== */}
-          <div className="seat3d-pillar seat3d-pillar-fl" ><i /><i /></div>
-          <div className="seat3d-pillar seat3d-pillar-fr" ><i /><i /></div>
-          <div className="seat3d-pillar seat3d-pillar-bl" ><i /><i /></div>
-          <div className="seat3d-pillar seat3d-pillar-br" ><i /><i /></div>
-
-          {/* ===== ZONA KURSI (floor miring perspektif) ===== */}
+          {/* Lantai aula */}
           <div className="seat3d-floor">
-            {/* Karpet aula — paling bawah (dirender dulu) */}
             <div className="seat3d-carpet" />
+            <div className="seat3d-aisle" />
 
             {ZONES.map((z, zi) => {
               const st = stat(z.cat);
               const seats = [];
-              const half = z.perRow / 2; // 10 kiri + 10 kanan per baris
-              for (let row = 0; row < z.rows; row++) {
-                for (let col = 0; col < z.perRow; col++) {
-                  const idx = row * z.perRow + col;
+              for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < PER_ROW; col++) {
+                  const idx = row * PER_ROW + col;
+                  const { x, y } = seatPos(col, row);
+                  let state = "";
+                  if (idx < st.paid) state = " paid";
+                  else if (idx < st.paid + st.pending) state = " booked";
                   seats.push(
                     <span
                       key={idx}
-                      className={`seat3d-seat${idx < st.taken ? " taken" : ""}${row === 0 ? " front" : ""}`}
-                      style={{
-                        left: `${(col < half ? 1 + col * 4.2 : 57 + (col - half) * 4.2)}%`,
-                        top: `${row * 19.5}%`,
-                        "--c": z.color,
-                        "--cd": z.dark
-                      }}
+                      className={`seat3d-seat${state}`}
+                      style={{ left: `${x}%`, top: `${y}%`, "--c": z.color, "--cd": z.dark }}
                     />
                   );
                 }
               }
               return (
-                <div key={z.cat} className="seat3d-zone" style={{ top: `${14 + zi * 28}%` }}>
-                  <div
-                    className="seat3d-zone-floor"
-                    style={{ background: `linear-gradient(180deg, ${z.color}22, ${z.color}0d)`, borderColor: z.color, boxShadow: `inset 0 0 24px rgba(0,0,0,0.22), 0 0 0 1px ${z.color}44` }}
-                  >
-                    {seats}
-                  </div>
+                <div key={z.cat} className="seat3d-zone" style={{ top: `${ZONE_TOP[zi]}%`, height: `${ZONE_H}%`, borderColor: `${z.color}66`, background: `linear-gradient(180deg, ${z.color}14, ${z.color}08)` }}>
+                  {seats}
                 </div>
               );
             })}
 
-            {/* Label zona: anak langsung world agar berdiri tegak (preserve-3d) */}
+            {/* Papan nama zona: berdiri di lorong tengah, tepat di batas depan tiap zona */}
             {ZONES.map((z, zi) => {
               const st = stat(z.cat);
               return (
-                <div
-                  key={z.cat + "-tag"}
-                  className="seat3d-zone-tag"
-                  style={{ top: `${40 + zi * 28}%`, background: z.color }}
-                >
-                  {z.label} — sisa {st.total - st.taken} seat
+                <div key={z.cat + "-plate"} className="seat3d-plate" style={{ top: `${ZONE_TOP[zi] - 1.5}%`, background: z.color }}>
+                  {z.label} <em>· sisa {st.free}</em>
                 </div>
               );
             })}
 
-            {/* Lorong tengah — di atas zona (karpet sudah dirender duluan) */}
-            <div className="seat3d-aisle" />
+            {/* 4 tiang struktural di sisi kiri-kanan aula */}
+            <div className="seat3d-pillar pl1" />
+            <div className="seat3d-pillar pr1" />
+            <div className="seat3d-pillar pl2" />
+            <div className="seat3d-pillar pr2" />
           </div>
 
-          {/* ===== PINTU MASUK ===== */}
+          {/* Pintu masuk utama */}
           <div className="seat3d-entrance">
-            <div className="seat3d-door" /><div className="seat3d-door door-r" />
+            <div className="seat3d-door" /><div className="seat3d-door" />
             <span>PINTU MASUK UTAMA</span>
           </div>
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="seat-legend">
-        <span><i style={{ background: "#f59e0b" }} />Premium (dekat panggung)</span>
-        <span><i style={{ background: "#2563eb" }} />Reguler (tengah)</span>
-        <span><i style={{ background: "#10b981" }} />Economy (belakang)</span>
-        <span><i className="lg-taken" />terisi = sudah diambil peserta</span>
+      {/* Legenda status kursi */}
+      <div className="seat3d-legend">
+        <span><i className="sw-paid" /><b>Terisi</b> (lunas)</span>
+        <span><i className="sw-booked" /><b>Booking</b> (menunggu verifikasi)</span>
+        <span><i className="sw-free" /><b>Kosong</b> (bisa dipesan)</span>
       </div>
       <p className="seat3d-note">
-        *Denah 3D ilustrasi mengikuti layout aula (300 seat, mode theater, lorong tengah, 4 tiang struktural).
-        Seat dalam satu zona bebas dipilih peserta (first come, first served).
+        Kursi <b>booking</b> akan menjadi <b>terisi</b> setelah pembayaran diverifikasi admin,
+        atau kembali <b>kosong</b> jika ditolak. Seat dalam satu zona bebas dipilih peserta (first come, first served).
       </p>
     </div>
   );

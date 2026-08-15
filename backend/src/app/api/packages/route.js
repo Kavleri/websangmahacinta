@@ -39,7 +39,7 @@ export async function GET(request) {
         takenByCategory[p.category] += p.seat_type === "couple" ? 2 : 1;
       }
       if (r.status === "pending") {
-        pendingByCategory[p.category] += 1;
+        pendingByCategory[p.category] += p.seat_type === "couple" ? 2 : 1;
       }
     }
 
@@ -48,6 +48,7 @@ export async function GET(request) {
       if (!p.category) return p;
       const total = quotaByCategory[p.category] ?? CATEGORY_QUOTA_DEFAULT;
       const taken = takenByCategory[p.category] || 0;
+      const pendingSeats = Math.min(pendingByCategory[p.category] || 0, taken);
       const remaining = Math.max(0, total - taken);
       const seatsPerTicket = p.seat_type === "couple" ? 2 : 1;
       const releasedAtMs = p.released_at ? new Date(p.released_at).getTime() : 0;
@@ -56,7 +57,8 @@ export async function GET(request) {
         seats_total: total,
         seats_taken: taken,
         seats_remaining: remaining,
-        seats_pending: pendingByCategory[p.category] || 0,
+        seats_pending: pendingSeats,
+        seats_paid: Math.max(0, taken - pendingSeats),
         seats_per_ticket: seatsPerTicket,
         is_released: releasedAtMs > 0 ? now >= releasedAtMs : true,
         is_sold_out: remaining < seatsPerTicket
