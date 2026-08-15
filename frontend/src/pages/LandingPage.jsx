@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Hero from "../components/Hero";
+import SeatMap3D from "../components/SeatMap3D";
 import { CheckCircle2, Users, BookOpen, Heart, ShieldAlert, Calendar, Clock, MapPin, Smile, HelpCircle, AlertCircle, XCircle } from "lucide-react";
 import { API_BASE } from "../apiConfig";
 
@@ -631,11 +632,11 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 })}
               </div>
 
-              {/* Peta Kursi Aula (CSS Seat Map) */}
+              {/* Peta Kursi Aula 3D (CSS Seat Map) */}
               <div style={{ maxWidth: "860px", margin: "80px auto 0 auto" }}>
                 <div style={{ textAlign: "center", marginBottom: "28px" }}>
                   <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", color: "var(--color-primary)", fontWeight: 700 }}>
-                    Peta Kursi Aula — 300 Seat
+                    Peta Kursi Aula 3D — 300 Seat
                   </h3>
                   <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "6px" }}>
                     Denah live: titik terisi = seat sudah diambil peserta lain. Seat bebas memilih posisi di dalam zona masing-masing.
@@ -643,52 +644,8 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 </div>
 
                 <div className="glass-card seat-map" style={{ background: "white", padding: "24px" }}>
-                  <div className="seat-map-stage">🎤 PANGGUNG</div>
-
-                  {["premium", "reguler", "economy"].map((cat) => {
-                    const info = WAR_INFO[cat];
-                    const st = categoryStats[cat] || { total: 100, taken: 0 };
-                    const taken = Math.min(st.taken || 0, st.total);
-                    const half = Math.floor(st.total / 2);
-                    const dot = (isTaken, i) => (
-                      <span key={i} className={`seat-dot${isTaken ? " taken" : ""}`} style={{ borderColor: info.color, background: isTaken ? info.color : "transparent" }} />
-                    );
-                    return (
-                      <div key={cat} className="seat-zone-row" style={{ borderColor: info.color + "77", background: info.color + "0d" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", gap: "8px", flexWrap: "wrap" }}>
-                          <strong style={{ fontSize: "13px", color: "var(--color-primary)" }}>
-                            {info.label} <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>• {info.zone}</span>
-                          </strong>
-                          <span style={{ fontSize: "12px", fontWeight: 800, color: info.color }}>
-                            {st.total - taken} seat kosong
-                          </span>
-                        </div>
-                        <div className="seat-dots-wrap">
-                          <div className="seat-dots">
-                            {Array.from({ length: half }, (_, i) => dot(i < taken, i))}
-                          </div>
-                          <div className="seat-aisle" />
-                          <div className="seat-dots">
-                            {Array.from({ length: st.total - half }, (_, i) => dot(half + i < taken, i))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="seat-map-entrance">🚪 PINTU MASUK UTAMA</div>
-
-                  <div className="seat-legend" style={{ marginTop: "14px" }}>
-                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.premium.color, marginRight: "5px" }} />Premium (depan)</span>
-                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.reguler.color, marginRight: "5px" }} />Reguler (tengah)</span>
-                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.economy.color, marginRight: "5px" }} />Economy (belakang)</span>
-                    <span>■ terisi = sudah diambil</span>
-                  </div>
+                  <SeatMap3D categoryStats={categoryStats} />
                 </div>
-
-                <p style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "12.5px", marginTop: "14px" }}>
-                  *Denah ilustrasi mengikuti layout aula. Seat dalam satu zona bebas dipilih peserta (first come, first served).
-                </p>
               </div>
             </React.Fragment>
           )}
