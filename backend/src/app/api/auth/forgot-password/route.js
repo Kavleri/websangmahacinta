@@ -7,10 +7,12 @@ import nodemailer from "nodemailer";
 export const activeOtps = new Map();
 
 async function sendEmailOtp(toEmail, otpCode, username) {
-  const smtpHost = process.env.SMTP_HOST || "mail.sangmahacinta.com";
-  const smtpPort = parseInt(process.env.SMTP_PORT || "465", 10);
-  const smtpUser = process.env.SMTP_USER || "no-reply@sangmahacinta.com";
-  const smtpPass = process.env.SMTP_PASS || "";
+  // Read env at runtime (avoid Next.js build-time inlining)
+  const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
+  const smtpHost = getEnv("SMTP_HOST", "mail.sangmahacinta.com");
+  const smtpPort = parseInt(getEnv("SMTP_PORT", "465"), 10);
+  const smtpUser = getEnv("SMTP_USER", "no-reply@sangmahacinta.com");
+  const smtpPass = getEnv("SMTP_PASS", "");
 
   if (!smtpPass) {
     console.warn("SMTP_PASS belum diset di Vercel env. Email nyata dilewati.");
@@ -127,7 +129,7 @@ export async function POST(request) {
       message: emailSent 
         ? `Kode OTP verifikasi reset password telah dikirimkan ke email ${targetEmail}. Silakan cek Inbox / Spam folder Anda.`
         : `Kode OTP verifikasi reset password telah dikirimkan ke email ${targetEmail}.`,
-      demo_otp: process.env.SMTP_PASS ? undefined : otpCode,
+      demo_otp: emailSent ? undefined : otpCode,
       email_sent: emailSent,
       role: matchedRole,
       username: matchedUser.username

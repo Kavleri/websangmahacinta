@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import crypto from "crypto";
 
-const QR_SECRET_SALT = process.env.QR_SECRET_SALT || "dutaqu_secret_salt_2026";
+const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
+const QR_SECRET_SALT = getEnv("QR_SECRET_SALT", "dutaqu_secret_salt_2026");
 
 // GET /api/check-status?query=value
 export async function GET(request) {

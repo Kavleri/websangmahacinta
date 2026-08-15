@@ -2,23 +2,15 @@ import pg from "pg";
 import fs from "fs";
 import path from "path";
 
-// Database configuration supporting standard connection URI (e.g. Supabase DATABASE_URL)
+// Read env at runtime (avoid Next.js build-time inlining of process.env.X)
+function getEnv(key, fallback) {
+  return (typeof process !== "undefined" && process.env && process.env[key]) || fallback;
+}
+
+// Production connects via DATABASE_URL (Supabase pooler URI). Local dev can use DB_* variables instead.
 function getResolvedConnectionString() {
-  const rawString = process.env.DATABASE_URL || 
-    `postgresql://${process.env.DB_USER || "postgres"}:${process.env.DB_PASSWORD || ""}@${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || "5432"}/${process.env.DB_DATABASE || "postgres"}`;
-  
-  if (rawString.includes("db.cpsjztftrurtuvmiypjv.supabase.co")) {
-    const urlPattern = /postgres(?:ql)?:\/\/([^:]+):([^@]+)@([^:/]+)(?::(\d+))?\/([^??#\s]+)/;
-    const match = rawString.match(urlPattern);
-    if (match) {
-      const password = match[2];
-      const database = match[5];
-      // Rewrite to Tokyo IPv4 Connection Pooler (ap-northeast-1) on transaction port 6543
-      const poolerString = `postgresql://postgres.cpsjztftrurtuvmiypjv:${password}@aws-0-ap-northeast-1.pooler.supabase.com:6543/${database}?sslmode=require`;
-      return poolerString;
-    }
-  }
-  return rawString;
+  return getEnv("DATABASE_URL") ||
+    `postgresql://${getEnv("DB_USER", "postgres")}:${getEnv("DB_PASSWORD", "")}@${getEnv("DB_HOST", "localhost")}:${getEnv("DB_PORT", "5432")}/${getEnv("DB_DATABASE", "postgres")}`;
 }
 
 const connectionString = getResolvedConnectionString();
@@ -173,16 +165,14 @@ function writeFallbackDb(data) {
   }
 }
 
-// Try connection pool setup
+// Try connection pool setup (SSL required for Supabase)
+const isSupabase = connectionString.includes("supabase.co") || connectionString.includes("supabase.com");
 try {
-  if (connectionString.includes("supabase.co") || connectionString.includes("supabase.com")) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  }
-  // Support SSL for Supabase connection (standard production config)
   pool = new pg.Pool({
     connectionString,
-    ssl: connectionString.includes("supabase.co") || connectionString.includes("supabase.com") ? { rejectUnauthorized: false } : false
+    ssl: isSupabase ? { rejectUnauthorized: false } : false
   });
+  console.log("[db] mode:", isSupabase ? "PostgreSQL (Supabase)" : "PostgreSQL (local)");
 } catch (err) {
   console.warn("PostgreSQL pool creation failed. Switching to JSON file fallback database.", err.message);
   useFallback = true;
