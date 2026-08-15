@@ -24,7 +24,7 @@ export async function GET(request) {
     // Hitung seat terpakai per kategori: registrasi pending + paid (couple = 2 seat)
     let regs = [];
     try {
-      regs = await query("SELECT package_id, status FROM registrations");
+      regs = await query("SELECT package_id, status, seat_numbers FROM registrations");
     } catch (e) {
       console.warn("registrations tidak terbaca:", e.message);
     }
@@ -32,14 +32,36 @@ export async function GET(request) {
     for (const p of packages || []) pkgById[String(p.id)] = p;
     const takenByCategory = { economy: 0, reguler: 0, premium: 0 };
     const pendingByCategory = { economy: 0, reguler: 0, premium: 0 };
+    // Peta kursi per kategori: index kursi yang diklaim (paid / booked) + jumlah legacy tanpa kursi eksplisit
+    const seatsMapByCategory = {
+      economy: { paid: [], booked: [], legacyPaid: 0, legacyBooked: 0 },
+      reguler: { paid: [], booked: [], legacyPaid: 0, legacyBooked: 0 },
+      premium: { paid: [], booked: [], legacyPaid: 0, legacyBooked: 0 }
+    };
     for (const r of regs || []) {
       const p = pkgById[String(r.package_id)];
       if (!p || !p.category || !CATEGORIES.includes(p.category)) continue;
+      if (r.status !== "pending" && r.status !== "paid") continue;
       if (r.status === "pending" || r.status === "paid") {
         takenByCategory[p.category] += p.seat_type === "couple" ? 2 : 1;
       }
       if (r.status === "pending") {
         pendingByCategory[p.category] += p.seat_type === "couple" ? 2 : 1;
+      }
+      const map = seatsMapByCategory[p.category];
+      let nums = null;
+      if (r.seat_numbers) {
+        try {
+          const arr = JSON.parse(r.seat_numbers);
+          if (Array.isArray(arr) && arr.length > 0) nums = arr.map((n) => parseInt(n, 10));
+        } catch (e) { /* data rusak dianggap legacy */ }
+      }
+      if (nums) {
+        const bucket = r.status === "paid" ? map.paid : map.booked;
+        nums.forEach((n) => { if (!bucket.includes(n)) bucket.push(n); });
+      } else {
+        const seats = p.seat_type === "couple" ? 2 : 1;
+        if (r.status === "paid") map.legacyPaid += seats; else map.legacyBooked += seats;
       }
     }
 
@@ -59,6 +81,7 @@ export async function GET(request) {
         seats_remaining: remaining,
         seats_pending: pendingSeats,
         seats_paid: Math.max(0, taken - pendingSeats),
+        seats_map: seatsMapByCategory[p.category],
         seats_per_ticket: seatsPerTicket,
         is_released: releasedAtMs > 0 ? now >= releasedAtMs : true,
         is_sold_out: remaining < seatsPerTicket

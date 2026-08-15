@@ -10,6 +10,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { package_id, name, email, whatsapp, voucher_code } = body;
+    let registerSeatNumbers = null;
 
     if (!package_id || !name || !email || !whatsapp) {
       return NextResponse.json({ error: "Semua data field wajib diisi!" }, { status: 400 });
@@ -44,7 +45,7 @@ export async function POST(request) {
 
       let allRegs = [];
       try {
-        allRegs = await query("SELECT package_id, status FROM registrations");
+        allRegs = await query("SELECT package_id, status, seat_numbers FROM registrations");
       } catch (e) { /* fallback: dianggap kosong */ }
       const catIds = new Set(
         (packages || []).filter(p => p.category === selectedPackage.category).map(p => String(p.id))
@@ -62,6 +63,47 @@ export async function POST(request) {
         return NextResponse.json({
           error: "Maaf, seat untuk kategori ini sudah HABIS. Silakan pilih kategori tiket lainnya."
         }, { status: 409 });
+      }
+
+      // 1c. Validasi & klaim kursi pilihan peserta (seat selection)
+      if (Array.isArray(body.seat_numbers) && body.seat_numbers.length > 0) {
+        const seatsNeededSel = selectedPackage.seat_type === "couple" ? 2 : 1;
+        const seats = body.seat_numbers.map((n) => parseInt(n, 10));
+        const seatLabel = (n) => `${selectedPackage.category.charAt(0).toUpperCase()}-${n + 1}`;
+        const valid = seats.length === seatsNeededSel &&
+          seats.every((n) => Number.isInteger(n) && n >= 0 && n <= 99) &&
+          new Set(seats).size === seats.length;
+        if (!valid) {
+          return NextResponse.json({
+            error: `Pilihan kursi tidak valid. ${seatsNeededSel === 2 ? "Pilih tepat 2 kursi berdampingan (sebaris, satu blok)." : "Pilih 1 kursi."}`
+          }, { status: 400 });
+        }
+        if (seatsNeededSel === 2) {
+          const pair = seats.slice().sort((a, b) => a - b);
+          const sameRow = Math.floor(pair[0] / 20) === Math.floor(pair[1] / 20);
+          const adjacentSameBlock = pair[1] === pair[0] + 1 && pair[0] % 20 !== 9; // col 9 = ujung blok kiri (seberang lorong)
+          if (!sameRow || !adjacentSameBlock) {
+            return NextResponse.json({ error: "Kursi couple harus 2 kursi berdampingan pada baris yang sama." }, { status: 400 });
+          }
+        }
+        // Cek bentrok dengan kursi yang sudah diklaim (pending/paid) di kategori yang sama
+        const claimed = new Set();
+        for (const r of allRegs || []) {
+          if (!catIds.has(String(r.package_id))) continue;
+          if (r.status !== "pending" && r.status !== "paid") continue;
+          if (!r.seat_numbers) continue;
+          try {
+            const arr = JSON.parse(r.seat_numbers);
+            if (Array.isArray(arr)) arr.forEach((n) => claimed.add(parseInt(n, 10)));
+          } catch (e) { /* abaikan data rusak */ }
+        }
+        const clash = seats.filter((n) => claimed.has(n));
+        if (clash.length > 0) {
+          return NextResponse.json({
+            error: `Kursi ${clash.map(seatLabel).join(", ")} sudah diambil peserta lain. Silakan pilih kursi kosong lain.`
+          }, { status: 409 });
+        }
+        registerSeatNumbers = JSON.stringify(seats);
       }
     }
 
@@ -126,7 +168,7 @@ export async function POST(request) {
     // 6. Save to DB
     // Check if DATABASE_URL connection string supports pg compatible dynamic inserts
     const insertResult = await query(
-      "INSERT INTO registrations (registration_code, package_id, name, email, whatsapp, base_price, unique_code, total_price, status, voucher_code, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)",
+      "INSERT INTO registrations (registration_code, package_id, name, email, whatsapp, base_price, unique_code, total_price, status, voucher_code, discount_amount, seat_numbers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)",
       [
         regCode,
         parseInt(package_id, 10),
@@ -137,7 +179,8 @@ export async function POST(request) {
         uniqueCode,
         totalPrice,
         validVoucherCode,
-        discount
+        discount,
+        registerSeatNumbers
       ]
     );
 
@@ -165,6 +208,7 @@ export async function POST(request) {
         status: "pending",
         voucher_code: validVoucherCode,
         discount_amount: discount,
+        seat_numbers: registerSeatNumbers ? JSON.parse(registerSeatNumbers) : null,
         qr_payload: `${regCode}:${signature}`
       }
     });

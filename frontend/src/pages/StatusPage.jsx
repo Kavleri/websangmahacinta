@@ -236,6 +236,23 @@ export default function StatusPage({ defaultQuery }) {
                         <div style={{ fontSize: "13px", display: "flex", flexDirection: "column", gap: "6px" }}>
                           <p style={{ fontWeight: 700, fontSize: "16px", color: "white" }}>{reg.name}</p>
                           <p style={{ opacity: 0.8 }}>{reg.package_name}</p>
+                          {(() => {
+                            let seats = null;
+                            if (reg.seat_numbers) {
+                              try {
+                                const arr = typeof reg.seat_numbers === "string" ? JSON.parse(reg.seat_numbers) : reg.seat_numbers;
+                                if (Array.isArray(arr) && arr.length > 0) seats = arr;
+                              } catch (e) { /* abaikan */ }
+                            }
+                            const catInitial = (reg.category || reg.package_name || "x").charAt(0).toUpperCase();
+                            return seats ? (
+                              <p style={{ marginTop: "2px" }}>
+                                <span style={{ background: "rgba(56, 189, 248, 0.25)", border: "1px solid #38bdf8", borderRadius: "8px", padding: "3px 10px", fontWeight: 800, color: "#e0f2fe", fontSize: "13px" }}>
+                                  💺 Kursi: {seats.map((n) => `${catInitial}-${n + 1}`).join(" + ")}
+                                </span>
+                              </p>
+                            ) : null;
+                          })()}
                           <div style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7, marginTop: "4px" }}>
                             <Calendar size={12} /> <span>Rabu, 09 September 2026</span>
                           </div>

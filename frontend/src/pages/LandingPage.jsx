@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Hero from "../components/Hero";
-import SeatMap3D from "../components/SeatMap3D";
+import SeatMap3D, { seatLabel, buildStates } from "../components/SeatMap3D";
 import { CheckCircle2, Users, BookOpen, Heart, ShieldAlert, Calendar, Clock, MapPin, Smile, HelpCircle, AlertCircle, XCircle } from "lucide-react";
 import { API_BASE } from "../apiConfig";
 
@@ -25,6 +25,10 @@ export default function LandingPage({ onSelectPackage, setPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [nowMs, setNowMs] = useState(Date.now());
+  // Mode pilih kursi: {cat, seatType, pkg} + kursi yang dipilih user (index 0-99)
+  const [seatPick, setSeatPick] = useState(null);
+  const [seatSel, setSeatSel] = useState([]);
+  const [seatError, setSeatError] = useState(null);
 
   const loadPackages = () => {
     fetch(`${API_BASE}/api/packages`)
@@ -77,6 +81,43 @@ export default function LandingPage({ onSelectPackage, setPage }) {
     } else {
       categoryStats[cat] = null;
     }
+  }
+
+  // Mulai mode pilih kursi dari kartu tiket → scroll ke peta
+  const startPick = (cat, seatType, pkg) => {
+    setSeatPick({ cat, seatType, pkg });
+    setSeatSel([]);
+    setSeatError(null);
+    setTimeout(() => {
+      const el = document.getElementById("seat-map-section");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 60);
+  };
+
+  // Klik kursi di peta (hanya zona aktif, kursi kosong)
+  const handleSeatClick = (cat, idx) => {
+    if (!seatPick || seatPick.cat !== cat) return;
+    const states = buildStates(seatsMaps[cat]);
+    let pick = [idx];
+    if (seatPick.seatType === "couple") {
+      const col = idx % 20; // kolom 0-9 blok kiri, 10-19 blok kanan (9 & 19 = ujung blok)
+      pick = col === 9 || col === 19 ? [idx - 1, idx] : [idx, idx + 1];
+    }
+    const bad = pick.filter((n) => n < 0 || n > 99 || states[n] !== "free");
+    if (bad.length > 0) {
+      setSeatSel([]);
+      setSeatError(`Kursi ${bad.map((n) => seatLabel(cat, n)).join(" & ")} tidak tersedia (sudah diambil / booking). Pilih kursi kosong (putih).`);
+      return;
+    }
+    setSeatSel(pick);
+    setSeatError(null);
+  };
+
+  // Peta kursi per kategori (dari packages API)
+  const seatsMaps = {};
+  for (const cat of CATEGORY_ORDER) {
+    const p = byCategory[cat].personal;
+    if (p && p.seats_map) seatsMaps[cat] = p.seats_map;
   }
 
   return (
@@ -622,10 +663,11 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                                 cursor: enabled ? "pointer" : "not-allowed"
                               }}
                               disabled={!enabled}
-                              onClick={() => onSelectPackage(pkg)}
+                              onClick={() => startPick(cat, pkg.seat_type, pkg)}
+                              title={enabled ? "Pilih kursi di peta 3D, lalu lanjut ke pembayaran" : "Tidak tersedia"}
                             >
                               <span style={{ fontWeight: 700 }}>
-                                {pkg.seat_type === "couple" ? "Couple (2 orang)" : "Personal (1 orang)"}
+                                🎟️ Pilih Kursi {pkg.seat_type === "couple" ? "Couple (2 org)" : "Personal (1 org)"}
                               </span>
                               <span style={{ fontWeight: 800 }}>
                                 Rp {parseFloat(pkg.price).toLocaleString("id-ID")}
@@ -639,19 +681,67 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 })}
               </div>
 
-              {/* Peta Kursi Aula 3D (CSS Seat Map) */}
-              <div style={{ maxWidth: "860px", margin: "80px auto 0 auto" }}>
+              {/* Peta Kursi Aula 3D — interaktif: pilih kursi lalu lanjut bayar via WA */}
+              <div id="seat-map-section" style={{ maxWidth: "860px", margin: "80px auto 0 auto" }}>
                 <div style={{ textAlign: "center", marginBottom: "28px" }}>
                   <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", color: "var(--color-primary)", fontWeight: 700 }}>
-                    Peta Kursi Aula 3D — 300 Seat
+                    Pilih Kursimu di Aula — Peta 3D Live
                   </h3>
                   <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "6px" }}>
-                    Denah live: titik terisi = seat sudah diambil peserta lain. Seat bebas memilih posisi di dalam zona masing-masing.
+                    Klik tombol <b>Pilih Kursi</b> pada kategori tiket di atas, lalu klik kursi kosong (putih) di peta ini.
                   </p>
                 </div>
 
-                <div className="glass-card seat-map" style={{ background: "white", padding: "24px" }}>
-                  <SeatMap3D categoryStats={categoryStats} />
+                {/* Bar status pemilihan kursi */}
+                <div className="glass-card" style={{ background: "rgba(255,255,255,0.95)", padding: "16px 18px", borderRadius: "14px 14px 0 0", borderBottom: "none" }}>
+                  {!seatPick ? (
+                    <p style={{ fontSize: "13.5px", color: "var(--text-muted)", textAlign: "center", margin: 0 }}>
+                      Belum ada mode pilih aktif — klik <b>🎟️ Pilih Kursi</b> di kartu tiket untuk mulai.
+                    </p>
+                  ) : (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+                        <span style={{ fontSize: "12px", fontWeight: 800, padding: "5px 12px", borderRadius: "999px", background: WAR_INFO[seatPick.cat].color + "1a", color: WAR_INFO[seatPick.cat].color, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                          {WAR_INFO[seatPick.cat].label} • {seatPick.seatType === "couple" ? "Couple (2 kursi)" : "Personal (1 kursi)"}
+                        </span>
+                        {seatSel.length > 0 ? (
+                          <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--color-primary)" }}>
+                            Kursi pilihanmu: <span style={{ background: "#e0f2fe", border: "1.5px solid #38bdf8", borderRadius: "8px", padding: "3px 10px", color: "#0369a1" }}>
+                              {seatSel.map((n) => seatLabel(seatPick.cat, n)).join(" + ")}
+                            </span>
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                            Sekarang klik kursi <b>kosong (putih)</b> di zona {WAR_INFO[seatPick.cat].label} pada peta di bawah 👇
+                          </span>
+                        )}
+                        <button className="btn btn-secondary" style={{ padding: "5px 12px", fontSize: "12px", borderRadius: "999px" }} onClick={() => { setSeatPick(null); setSeatSel([]); setSeatError(null); }}>
+                          Batal
+                        </button>
+                      </div>
+                      {seatSel.length > 0 && (
+                        <button
+                          className="btn btn-primary"
+                          style={{ padding: "11px 20px", fontWeight: 800, whiteSpace: "nowrap" }}
+                          onClick={() => onSelectPackage(seatPick.pkg, { cat: seatPick.cat, seatType: seatPick.seatType, seats: seatSel })}
+                        >
+                          Lanjut Isi Data & Bayar via WA →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {seatError && (
+                    <p style={{ color: "#b91c1c", fontSize: "12.5px", margin: "10px 0 0", textAlign: "center" }}>⚠️ {seatError}</p>
+                  )}
+                </div>
+
+                <div className="seat-map" style={{ marginTop: 0, borderRadius: "0 0 14px 14px", overflow: "hidden" }}>
+                  <SeatMap3D
+                    seatsMaps={seatsMaps}
+                    selectMode={seatPick ? { cat: seatPick.cat, need: seatPick.seatType === "couple" ? 2 : 1 } : null}
+                    selected={seatPick ? seatSel : []}
+                    onSeatClick={handleSeatClick}
+                  />
                 </div>
               </div>
             </React.Fragment>

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Info, ShieldAlert, CheckCircle, Upload, ArrowLeft, Send } from "lucide-react";
 import { API_BASE } from "../apiConfig";
 
-export default function CheckoutPage({ selectedPackage, setPage, setQueryCode }) {
+export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, setQueryCode }) {
+  const seatLabels = selectedSeat && selectedSeat.seats
+    ? selectedSeat.seats.map((n) => `${(selectedSeat.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")
+    : null;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -79,6 +82,7 @@ export default function CheckoutPage({ selectedPackage, setPage, setQueryCode })
           email: formData.email,
           whatsapp: formData.whatsapp,
           voucher_code: appliedVoucher ? appliedVoucher.code : null,
+          seat_numbers: selectedSeat && selectedSeat.seats ? selectedSeat.seats : undefined,
         }),
       });
 
@@ -136,10 +140,10 @@ export default function CheckoutPage({ selectedPackage, setPage, setQueryCode })
   const getWhatsAppLink = () => {
     if (!regData) return "";
     const adminNumber = "6285762219848"; // 085762219848 formatted for international link
-    
+
     // Construct pre-filled message text
-    const message = `Halo Admin PeraQ/Duta Qur'an,\n\nSaya sudah melakukan transfer pembayaran registrasi untuk program kami.\n\nDetail Pendaftaran:\n- Nama: ${regData.name}\n- Kode Registrasi: ${regData.registration_code}\n- Program/Paket: ${regData.packageName}\n- Total Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nSaya lampirkan bukti pembayaran saya di halaman website. Mohon bantuannya untuk melakukan verifikasi tiket. Terima kasih!`;
-    
+    const message = `Halo Admin PeraQ/Duta Qur'an,\n\nSaya sudah melakukan transfer pembayaran registrasi untuk program kami.\n\nDetail Pendaftaran:\n- Nama: ${regData.name}\n- Kode Registrasi: ${regData.registration_code}\n- Program/Paket: ${regData.packageName}${regData.seat_numbers && regData.seat_numbers.length ? `\n- Kursi: ${regData.seat_numbers.map((n) => `${(regData.category || selectedSeat?.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")}` : ""}\n- Total Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nSaya lampirkan bukti pembayaran saya di halaman website. Mohon bantuannya untuk melakukan verifikasi tiket. Terima kasih!`;
+
     return `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`;
   };
 
@@ -187,6 +191,11 @@ export default function CheckoutPage({ selectedPackage, setPage, setQueryCode })
                   <> • sisa {selectedPackage.seats_remaining} seat</>
                 )}
               </span>
+              {seatLabels && (
+                <span style={{ width: "100%", background: "#e0f2fe", border: "1.5px solid #38bdf8", borderRadius: "8px", padding: "6px 10px", fontWeight: 800, color: "#0369a1", textAlign: "center" }}>
+                  💺 Kursi pilihanmu: {seatLabels}
+                </span>
+              )}
             </div>
           )}
 
@@ -309,9 +318,14 @@ export default function CheckoutPage({ selectedPackage, setPage, setQueryCode })
               <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "20px" }}>
                 Kode Registrasi Anda adalah:
               </p>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-primary)", letterSpacing: "1px", background: "rgba(29, 78, 216, 0.08)", padding: "12px", borderRadius: "10px", border: "1px dashed var(--color-primary)", marginBottom: "24px" }}>
+              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-primary)", letterSpacing: "1px", background: "rgba(29, 78, 216, 0.08)", padding: "12px", borderRadius: "10px", border: "1px dashed var(--color-primary)", marginBottom: "12px" }}>
                 {regData.registration_code}
               </div>
+              {seatLabels && (
+                <div style={{ background: "#e0f2fe", border: "1.5px solid #38bdf8", borderRadius: "10px", padding: "10px", marginBottom: "20px", fontWeight: 800, color: "#0369a1", fontSize: "15px" }}>
+                  💺 Kursi kamu: {seatLabels} <span style={{ fontWeight: 600, fontSize: "12px", color: "#0369a1" }}>(dikunci saat menunggu verifikasi pembayaran)</span>
+                </div>
+              )}
               <button className="btn btn-secondary" style={{ width: "100%" }} onClick={handleCheckTicket}>
                 Lihat Detail Status Tiket
               </button>

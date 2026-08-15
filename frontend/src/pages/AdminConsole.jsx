@@ -821,7 +821,7 @@ export default function AdminConsole() {
           style={{ borderRadius: "12px", padding: "10px 20px", fontSize: "14px" }}
           onClick={() => setActiveTab("registrations")}
         >
-          <Users size={16} /> Verifikasi Pembayaran
+          <Users size={16} /> Pesanan & Verifikasi Pembayaran
         </button>
         <button 
           className={`btn ${activeTab === "packages" ? "btn-primary" : "btn-secondary"}`}
@@ -895,6 +895,7 @@ export default function AdminConsole() {
                   <th style={{ padding: "12px" }}>Kode / Tanggal</th>
                   <th style={{ padding: "12px" }}>Detail Guest</th>
                   <th style={{ padding: "12px" }}>Paket Program</th>
+                  <th style={{ padding: "12px" }}>Kursi</th>
                   <th style={{ padding: "12px" }}>Nominal Transfer</th>
                   <th style={{ padding: "12px" }}>Status / Bukti</th>
                   <th style={{ padding: "12px", textAlign: "center" }}>Aksi</th>
@@ -903,7 +904,7 @@ export default function AdminConsole() {
               <tbody>
                 {filteredRegistrations.length === 0 ? (
                   <tr>
-                    <td colSpan="6" style={{ padding: "30px", textAlign: "center", color: "var(--text-muted)" }}>
+                    <td colSpan="7" style={{ padding: "30px", textAlign: "center", color: "var(--text-muted)" }}>
                       Tidak ada data pendaftaran ditemukan.
                     </td>
                   </tr>
@@ -928,6 +929,20 @@ export default function AdminConsole() {
                             ✓ Checked In
                           </span>
                         )}
+                      </td>
+                      <td style={{ padding: "14px 12px" }}>
+                        {(() => {
+                          if (!reg.seat_numbers) return <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>—</span>;
+                          try {
+                            const arr = typeof reg.seat_numbers === "string" ? JSON.parse(reg.seat_numbers) : reg.seat_numbers;
+                            const c = (reg.category || "x").charAt(0).toUpperCase();
+                            return (
+                              <span style={{ background: "#e0f2fe", border: "1px solid #7dd3fc", color: "#0369a1", fontWeight: 800, borderRadius: "7px", padding: "3px 8px", fontSize: "12.5px", whiteSpace: "nowrap" }}>
+                                {Array.isArray(arr) ? arr.map((n) => `${c}-${n + 1}`).join(" + ") : "—"}
+                              </span>
+                            );
+                          } catch (e) { return <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>—</span>; }
+                        })()}
                       </td>
                       <td style={{ padding: "14px 12px" }}>
                         <div style={{ fontWeight: 700 }}>Rp {parseFloat(reg.total_price).toLocaleString("id-ID")}</div>

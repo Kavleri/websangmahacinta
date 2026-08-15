@@ -962,6 +962,34 @@ footer strong {
   border-color: #5b21b6;
   box-shadow: 0 0 6px rgba(167, 139, 250, 0.8), 0 1.5px 0 rgba(0, 0, 0, 0.35);
 }
+/* pilihan user saat ini (putih bercahaya) */
+.seat3d-seat.selected {
+  background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 55%, #0ea5e9 100%);
+  border-color: #0284c7;
+  box-shadow: 0 0 9px rgba(56, 189, 248, 0.95), 0 0 3px #fff, 0 1.5px 0 rgba(0, 0, 0, 0.35);
+  animation: seatPulse 1.1s ease-in-out infinite;
+}
+@keyframes seatPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(56, 189, 248, 0.7), 0 0 2px #fff, 0 1.5px 0 rgba(0, 0, 0, 0.35); }
+  50% { box-shadow: 0 0 12px rgba(56, 189, 248, 1), 0 0 4px #fff, 0 1.5px 0 rgba(0, 0, 0, 0.35); }
+}
+/* kursi bisa diklik saat mode pilih */
+.seat3d-seat.pickable {
+  cursor: pointer;
+}
+.seat3d-seat.pickable:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #bae6fd 55%, #38bdf8 100%);
+  border-color: #0284c7;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.9), 0 1.5px 0 rgba(0, 0, 0, 0.35);
+  transform: scale(1.25);
+}
+/* zona aktif (sedang dipilih) vs zona lain di-redupkan */
+.seat3d-zone.zone-active {
+  border-color: #7dd3fc;
+  border-width: 2px;
+  box-shadow: 0 0 14px rgba(125, 211, 252, 0.45);
+}
+.seat3d-zone.zone-dim { opacity: 0.45; }
 
 /* --- papan nama zona (berdiri di lorong tengah, batas depan zona) --- */
 .seat3d-plate {
@@ -1070,6 +1098,7 @@ footer strong {
 .seat3d-legend .sw-paid { background: linear-gradient(180deg, #86efac, #16a34a); }
 .seat3d-legend .sw-booked { background: linear-gradient(180deg, #e9d5ff, #a78bfa); border-color: #5b21b6; }
 .seat3d-legend .sw-free { background: linear-gradient(180deg, #f8fafc, #cbd5e1); }
+.seat3d-legend .sw-selected { background: linear-gradient(180deg, #ffffff, #38bdf8); border-color: #0284c7; }
 .seat3d-note {
   margin: 10px 4px 0;
   text-align: center;

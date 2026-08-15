@@ -9,6 +9,7 @@ import StaffScanGate from "./pages/StaffScanGate";
 function App() {
   const [page, setPage] = useState("landing"); // landing, checkout, status, admin, staff
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedSeat, setSelectedSeat] = useState(null); // {cat, seatType, seats:[idx]}
   const [queryCode, setQueryCode] = useState("");
 
   React.useEffect(() => {
@@ -20,8 +21,9 @@ function App() {
     }
   }, []);
 
-  const handleSelectPackage = (pkg) => {
+  const handleSelectPackage = (pkg, seatInfo = null) => {
     setSelectedPackage(pkg);
+    setSelectedSeat(seatInfo);
     setPage("checkout");
   };
 
@@ -49,9 +51,10 @@ function App() {
         )}
         
         {page === "checkout" && (
-          <CheckoutPage 
-            selectedPackage={selectedPackage} 
-            setPage={handleSetPage} 
+          <CheckoutPage
+            selectedPackage={selectedPackage}
+            selectedSeat={selectedSeat}
+            setPage={handleSetPage}
             setQueryCode={setQueryCode}
           />
         )}
