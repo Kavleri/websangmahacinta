@@ -530,6 +530,23 @@ export default function AdminConsole() {
       .reduce((sum, r) => sum + parseFloat(r.total_price || 0), 0),
   };
 
+  // Ringkasan kuota seat per kategori (war tiket)
+  const seatCategories = ["economy", "reguler", "premium"]
+    .map((cat) => {
+      const p = packages.find((x) => x.category === cat && x.seat_type === "personal");
+      if (!p) return null;
+      return {
+        category: cat,
+        label: cat.charAt(0).toUpperCase() + cat.slice(1),
+        total: p.seats_total ?? 100,
+        taken: p.seats_taken ?? 0,
+        remaining: p.seats_remaining ?? 100,
+        pending: p.seats_pending ?? 0,
+        isReleased: p.is_released ?? true,
+      };
+    })
+    .filter(Boolean);
+
   // Get checked-in registrations for history view
   const checkedInRegistrations = registrations
     .filter(r => r.checked_in)
@@ -745,6 +762,40 @@ export default function AdminConsole() {
           <div style={{ fontSize: "11px", opacity: 0.7, marginTop: "6px" }}>dari {stats.totalPaid} tiket lunas</div>
         </div>
       </div>
+
+      {/* Ringkasan Kuota Seat per Kategori (War Tiket) */}
+      {seatCategories.length > 0 && (
+        <div className="glass-card" style={{ background: "rgba(255,255,255,0.9)", borderRadius: "16px", padding: "20px", marginBottom: "32px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
+            <strong style={{ color: "var(--color-primary)", fontSize: "15px" }}>Kuota Seat per Kategori (War Tiket)</strong>
+            <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+              Seat terpakai = pending + lunas • Tolak pembayaran invalid agar seat kembali
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
+            {seatCategories.map((c) => {
+              const pct = Math.max(0, Math.min(100, Math.round((c.remaining / c.total) * 100)));
+              const color = c.category === "premium" ? "#f59e0b" : c.category === "reguler" ? "#2563eb" : "#10b981";
+              return (
+                <div key={c.category} style={{ border: "1px solid rgba(0,0,0,0.06)", borderRadius: "12px", padding: "14px", background: "white" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <strong style={{ fontSize: "13.5px", color: "var(--color-primary)" }}>
+                      {c.label} Seat {!c.isReleased && <span title="Belum dibuka">(🔒 belum dibuka)</span>}
+                    </strong>
+                    <span style={{ fontSize: "12.5px", fontWeight: 800, color: c.remaining <= 0 ? "#dc2626" : color }}>
+                      {c.remaining}/{c.total}
+                    </span>
+                  </div>
+                  <div className="quota-bar"><span style={{ width: `${pct}%`, background: color }} /></div>
+                  <p style={{ fontSize: "11.5px", color: "var(--text-muted)", marginTop: "6px" }}>
+                    {c.taken} seat terpakai • {c.pending} pending verifikasi
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Admin Tab Selectors */}
       <div className="admin-tab-nav" style={{ display: "flex", gap: "12px", borderBottom: "2px solid rgba(0,0,0,0.05)", paddingBottom: "12px", marginBottom: "32px", overflowX: "auto" }}>

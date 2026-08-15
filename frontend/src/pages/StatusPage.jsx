@@ -237,10 +237,10 @@ export default function StatusPage({ defaultQuery }) {
                           <p style={{ fontWeight: 700, fontSize: "16px", color: "white" }}>{reg.name}</p>
                           <p style={{ opacity: 0.8 }}>{reg.package_name}</p>
                           <div style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7, marginTop: "4px" }}>
-                            <Calendar size={12} /> <span>18 Juli 2026</span>
+                            <Calendar size={12} /> <span>Rabu, 09 September 2026</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7 }}>
-                            <Clock size={12} /> <span>07.30 - 16.00 WIB</span>
+                            <Clock size={12} /> <span>07.30 - 15.00 WIB</span>
                           </div>
                         </div>
                       </div>

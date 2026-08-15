@@ -3,12 +3,29 @@ import Hero from "../components/Hero";
 import { CheckCircle2, Users, BookOpen, Heart, ShieldAlert, Calendar, Clock, MapPin, Smile, HelpCircle, AlertCircle, XCircle } from "lucide-react";
 import { API_BASE } from "../apiConfig";
 
+const WAR_INFO = {
+  economy: { label: "Economy Seat", zone: "Barisan Belakang", color: "#10b981", schedule: "17 – 20 Agustus 2026", openAt: "17 Agustus 2026, 00.00 WIB" },
+  reguler: { label: "Reguler Seat", zone: "Barisan Tengah", color: "#2563eb", schedule: "21 – 24 Agustus 2026", openAt: "21 Agustus 2026, 00.00 WIB" },
+  premium: { label: "Premium Seat", zone: "Barisan Paling Depan", color: "#f59e0b", schedule: "25 – 28 Agustus 2026", openAt: "25 Agustus 2026, 00.00 WIB" }
+};
+const CATEGORY_ORDER = ["economy", "reguler", "premium"];
+
+function formatCountdown(ms) {
+  if (ms <= 0) return "0h 0m";
+  const d = Math.floor(ms / 86400000);
+  const h = Math.floor((ms % 86400000) / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return d > 0 ? `${d}h ${h}j ${m}m` : `${h}j ${m}m ${s}d`;
+}
+
 export default function LandingPage({ onSelectPackage, setPage }) {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [nowMs, setNowMs] = useState(Date.now());
 
-  useEffect(() => {
+  const loadPackages = () => {
     fetch(`${API_BASE}/api/packages`)
       .then((res) => {
         if (!res.ok) throw new Error("Gagal mengambil data paket.");
@@ -22,7 +39,37 @@ export default function LandingPage({ onSelectPackage, setPage }) {
         setError(err.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadPackages();
+    // Jam live (untuk gate war tiket) + refresh ketersediaan seat tiap 60 detik
+    const clock = setInterval(() => setNowMs(Date.now()), 1000);
+    const poll = setInterval(loadPackages, 60000);
+    return () => { clearInterval(clock); clearInterval(poll); };
   }, []);
+
+  // Kelompokkan paket tiket per kategori
+  const byCategory = { economy: {}, reguler: {}, premium: {} };
+  for (const p of packages) {
+    if (p.category && byCategory[p.category]) {
+      byCategory[p.category][p.seat_type] = p;
+    }
+  }
+  const categoryStats = {};
+  for (const cat of CATEGORY_ORDER) {
+    const personal = byCategory[cat].personal;
+    categoryStats[cat] = personal
+      ? {
+          total: personal.seats_total ?? 100,
+          taken: personal.seats_taken ?? 0,
+          remaining: personal.seats_remaining ?? 100,
+          isReleased: personal.is_released ?? true,
+          releasedAtMs: personal.released_at ? Date.parse(personal.released_at) : 0,
+          warEndsMs: personal.war_ends_at ? Date.parse(personal.war_ends_at) : 0
+        }
+      : null;
+  }
 
   return (
     <div>
@@ -162,21 +209,17 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 width: "120px",
                 height: "120px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #0c2450 0%, #2563c7 100%)",
                 margin: "0 auto 20px auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "36px",
-                fontWeight: "bold"
+                overflow: "hidden",
+                border: "4px solid rgba(37, 99, 235, 0.15)",
+                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
               }}>
-                AR
+                <img src="/speakers/indra-noveldy.jpg" alt="Coach Indra Noveldy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
-              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Ustadz Abdul Rohman</h3>
-              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Ketua Program Duta Qur'an</p>
+              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Coach Indra Noveldy</h3>
+              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Profesional Marriage Consultant</p>
               <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-                Fokus pada penyampaian materi Visi Pernikahan Berkah, manajemen niat, serta landasan teologis pembentukan keluarga sakinah.
+                Penulis buku Best Seller <strong>"Menikah Untuk Bahagia"</strong>. Berpengalaman mendampingi ribuan pasangan rumah tangga dalam resolusi konflik dan implementasi Menikah Untuk Bahagia.
               </p>
             </div>
 
@@ -186,21 +229,17 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 width: "120px",
                 height: "120px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #0c2450 0%, #2563c7 100%)",
                 margin: "0 auto 20px auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "36px",
-                fontWeight: "bold"
+                overflow: "hidden",
+                border: "4px solid rgba(37, 99, 235, 0.15)",
+                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
               }}>
-                AH
+                <img src="/speakers/abi-heru.jpg" alt="Abi Heru Arrasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
-              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Ustazah Alya Hijab</h3>
-              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Pakar Psikologi Pasangan</p>
+              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Abi Heru Arrasyid</h3>
+              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Ketua Yayasan Pesantren Tahfidz Arrasyid</p>
               <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-                Ahli dalam menjembatani cara berkomunikasi, memahami perbedaan psikologi laki-laki dan perempuan, serta bahasa kasih.
+                Founder Duta Quran Indonesia. Berpengalaman mengasuh lebih dari 10 pondok pesantren dan membina lebih dari 1.000 lembaga pendidikan Quran di Indonesia.
               </p>
             </div>
 
@@ -210,111 +249,18 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 width: "120px",
                 height: "120px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #0c2450 0%, #2563c7 100%)",
                 margin: "0 auto 20px auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "36px",
-                fontWeight: "bold"
+                overflow: "hidden",
+                border: "4px solid rgba(37, 99, 235, 0.15)",
+                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
               }}>
-                UH
+                <img src="/speakers/ummi-rasyid.jpg" alt="Ummi Rasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
-              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Ustadz Hisyam</h3>
-              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Mentor & Konselor Keluarga</p>
+              <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Ummi Rasyid</h3>
+              <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Survivor Cancer • Founder Duta Quran Indonesia</p>
               <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-                Berpengalaman mendampingi ratusan pasangan dalam resolusi konflik rumah tangga dan implementasi sakinah harian.
+                Survivor Bone Marrow Cancer lebih dari 21 tahun. Telah menginspirasi ratusan ribu peserta seminar di seluruh Indonesia dan membina lebih dari 2.500 Guru Ngaji.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Agenda & Rundown Section */}
-      <section id="agenda-section" style={{ padding: "80px 0", background: "rgba(255, 255, 255, 0.4)", borderBottom: "1px solid rgba(12, 36, 80, 0.05)" }}>
-        <div className="container" style={{ maxWidth: "800px" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <span style={{ fontSize: "12px", fontWeight: "800", letterSpacing: "1.5px", color: "var(--color-accent)", textTransform: "uppercase", display: "block", marginBottom: "8px" }}>
-              Rundown Seminar
-            </span>
-            <h2 style={{ fontSize: "clamp(26px, 4vw, 38px)", color: "var(--color-primary)", marginBottom: "16px", lineHeight: 1.2 }}>
-              Agenda Kegiatan Pembelajaran
-            </h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>
-              Jadwal sesi seminar interaktif sehari penuh yang dirancang terstruktur demi kenyamanan belajar Anda.
-            </p>
-          </div>
-
-          <div className="glass-card" style={{ background: "white", padding: "32px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              
-              {/* Row 1 */}
-              <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", borderBottom: "1px solid rgba(0,0,0,0.05)", paddingBottom: "16px" }}>
-                <div style={{ fontWeight: "800", color: "var(--color-accent)", fontSize: "15px", whiteSpace: "nowrap", width: "120px" }}>
-                  07.30 - 08.00
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Registrasi &amp; Penukaran Tiket QR</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Verifikasi e-tiket oleh panitia, pembagian Seminar Kit dan tempat duduk.</p>
-                </div>
-              </div>
-
-              {/* Row 2 */}
-              <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", borderBottom: "1px solid rgba(0,0,0,0.05)", paddingBottom: "16px" }}>
-                <div style={{ fontWeight: "800", color: "var(--color-accent)", fontSize: "15px", whiteSpace: "nowrap", width: "120px" }}>
-                  08.00 - 10.15
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Sesi 1: Memahami Bahasa &amp; Cara Pandang Pasangan</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Dipimpin oleh Ustadz Abdul Rohman. Membedah mindset dasar suami-istri.</p>
-                </div>
-              </div>
-
-              {/* Row 3 */}
-              <div className="rundown-item">
-                <div className="rundown-time">
-                  09.30 - 11.45
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Sesi 2: Menjembatani Komunikasi &amp; Konflik Pasangan</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Dipimpin oleh Ustazah Alya Hijab. Sesi praktis mengenai cara berdiskusi tanpa emosi dan meredam ketegangan.</p>
-                </div>
-              </div>
-
-              {/* Row 4 */}
-              <div className="rundown-item">
-                <div className="rundown-time">
-                  11.45 - 13.00
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Istirahat, Shalat &amp; Makan Siang (ISHOMA)</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Waktu istirahat santai, shalat berjamaah, dan makan siang bersama pasangan.</p>
-                </div>
-              </div>
-
-              {/* Row 5 */}
-              <div className="rundown-item">
-                <div className="rundown-time">
-                  13.00 - 13.30
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Refleksi Interaktif &amp; Games Berpasangan</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Ice breaking dan latihan pengenalan bahasa cinta pasangan secara langsung melalui lembar aktivitas.</p>
-                </div>
-              </div>
-
-              {/* Row 6 */}
-              <div className="rundown-item" style={{ borderBottom: "none", paddingBottom: "0" }}>
-                <div className="rundown-time">
-                  13.30 - 16.00
-                </div>
-                <div>
-                  <h4 style={{ color: "var(--color-primary)", fontSize: "16px" }}>Sesi 3: Menumbuhkan Rumah Tangga Sakinah &amp; Penutup</h4>
-                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Dipimpin oleh Ustadz Hisyam. Diakhiri dengan sesi tanya jawab interaktif dan foto bersama.</p>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
@@ -339,15 +285,15 @@ export default function LandingPage({ onSelectPackage, setPage }) {
           }}>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>TANGGAL</p>
-              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Sabtu, 18 Juli 2026</h4>
+              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Rabu, 09 September 2026</h4>
             </div>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>WAKTU</p>
-              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>07.30 – 16.00 WIB</h4>
+              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>07.30 – 15.00 WIB</h4>
             </div>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>LOKASI</p>
-              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Segera Diumumkan</h4>
+              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Masjid At-Tohir (Exit Tol Cimanggis), Kota Depok, Jawa Barat</h4>
             </div>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>PESERTA</p>
@@ -544,15 +490,15 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 <p style={{ fontSize: "28px", fontWeight: "800", color: "#ef4444", textDecoration: "line-through", marginTop: "4px" }}>Rp1.200.000</p>
               </div>
               <div style={{ background: "rgba(16, 185, 129, 0.05)", borderRadius: "12px", padding: "12px" }}>
-                <p style={{ fontSize: "12px", fontWeight: "800", color: "#059669", textTransform: "uppercase" }}>Harga Spesial Seminar</p>
-                <p style={{ fontSize: "24px", fontWeight: "800", color: "#059669", marginTop: "4px" }}>Rp200.000 <span style={{ fontSize: "14px", fontWeight: "normal", color: "var(--text-muted)" }}>/ orang</span></p>
-                <p style={{ fontSize: "14px", fontWeight: "600", color: "var(--color-primary)", marginTop: "2px" }}>atau <span style={{ fontSize: "18px", fontWeight: "800" }}>Rp350.000</span> / pasangan</p>
+                <p style={{ fontSize: "12px", fontWeight: "800", color: "#059669", textTransform: "uppercase" }}>Infaq Mulai dari</p>
+                <p style={{ fontSize: "24px", fontWeight: "800", color: "#059669", marginTop: "4px" }}>Rp100.000 <span style={{ fontSize: "14px", fontWeight: "normal", color: "var(--text-muted)" }}>/ orang</span></p>
+                <p style={{ fontSize: "14px", fontWeight: "600", color: "var(--color-primary)", marginTop: "2px" }}>Economy • Reguler • Premium — <span style={{ fontSize: "15px", fontWeight: "800" }}>personal &amp; couple</span></p>
               </div>
             </div>
 
             <div style={{ marginTop: "24px", textAlign: "center" }}>
               <p style={{ fontSize: "13.5px", color: "var(--text-muted)", lineHeight: "1.6", maxWidth: "650px", margin: "0 auto" }}>
-                Satu sesi konsultasi pernikahan bisa mencapai ratusan ribu hingga jutaan rupiah. Di seminar ini, Anda mendapatkan bekal yang dapat diterapkan seumur hidup hanya mulai <strong>Rp350.000</strong>.
+                Satu sesi konsultasi pernikahan bisa mencapai ratusan ribu hingga jutaan rupiah. Di seminar ini, Anda mendapatkan bekal yang dapat diterapkan seumur hidup mulai <strong>Rp100.000</strong> (Economy Seat).
               </p>
             </div>
           </div>
@@ -575,66 +521,176 @@ export default function LandingPage({ onSelectPackage, setPage }) {
           )}
 
           {!loading && !error && (
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "32px",
-              justifyContent: "center"
-            }}>
-              {packages.filter(pkg => pkg.id === 1 || pkg.id === 2).map((pkg) => {
-                let parsedFeatures = [];
-                try {
-                  parsedFeatures = typeof pkg.features === "string" ? JSON.parse(pkg.features) : pkg.features;
-                } catch (e) {
-                  parsedFeatures = Array.isArray(pkg.features) ? pkg.features : [];
-                }
+            <React.Fragment>
+              {/* Jadwal War Tiket */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center", marginBottom: "40px" }}>
+                {CATEGORY_ORDER.map((cat) => (
+                  <span key={cat} className="war-chip">
+                    <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: WAR_INFO[cat].color, display: "inline-block" }} />
+                    War {WAR_INFO[cat].label}: {WAR_INFO[cat].schedule}
+                  </span>
+                ))}
+              </div>
 
-                return (
-                  <div key={pkg.id} className="glass-card" style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    padding: "32px",
-                    textAlign: "left",
-                    background: "rgba(255, 255, 255, 0.95)"
-                  }}>
-                    <div>
-                      <h3 style={{ fontSize: "22px", color: "var(--color-primary)", marginBottom: "12px" }}>{pkg.name}</h3>
-                      <p style={{ color: "var(--text-muted)", fontSize: "14px", minHeight: "60px", marginBottom: "20px" }}>{pkg.description}</p>
-                      
-                      {/* Price tag */}
-                      <div style={{ marginBottom: "24px" }}>
-                        <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-muted)" }}>Rp</span>
-                        <span style={{ fontSize: "36px", fontWeight: 800, color: "var(--text-dark)", marginLeft: "4px" }}>
-                          {parseFloat(pkg.price).toLocaleString("id-ID")}
+              {/* Kartu Tiket 3 Kategori */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+                gap: "32px",
+                justifyContent: "center"
+              }}>
+                {CATEGORY_ORDER.map((cat) => {
+                  const info = WAR_INFO[cat];
+                  const st = categoryStats[cat];
+                  const personal = byCategory[cat].personal;
+                  const couple = byCategory[cat].couple;
+                  if (!st || !personal) return null;
+
+                  const warActive = st.isReleased && st.warEndsMs > 0 && nowMs <= st.warEndsMs;
+                  const soldOut = st.remaining <= 0;
+                  const pct = Math.max(0, Math.min(100, Math.round((st.remaining / st.total) * 100)));
+                  const canBuy = st.isReleased && !soldOut;
+
+                  const badgeStyle = {
+                    display: "inline-block", alignSelf: "flex-start",
+                    fontSize: "12px", fontWeight: 800, padding: "6px 12px",
+                    borderRadius: "999px", marginBottom: "16px", lineHeight: 1.4
+                  };
+
+                  return (
+                    <div key={cat} className="glass-card" style={{
+                      display: "flex", flexDirection: "column",
+                      padding: "28px", textAlign: "left",
+                      background: "rgba(255, 255, 255, 0.95)",
+                      borderTop: `4px solid ${info.color}`
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", gap: "8px" }}>
+                        <h3 style={{ fontSize: "22px", color: "var(--color-primary)" }}>{info.label}</h3>
+                        <span style={{ fontSize: "10.5px", fontWeight: 800, padding: "4px 10px", borderRadius: "999px", background: info.color + "1a", color: info.color, whiteSpace: "nowrap" }}>
+                          {info.zone}
                         </span>
                       </div>
+                      <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "14px" }}>
+                        Kuota <strong>{st.total} seat</strong> • couple mengambil 2 seat
+                      </p>
 
-                      {/* Benefit list */}
-                      <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "20px", marginBottom: "32px" }}>
-                        <p style={{ fontSize: "13px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "12px", letterSpacing: "0.5px" }}>Fasilitas & Benefit:</p>
-                        <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
-                          {parsedFeatures.map((feat, i) => (
-                            <li key={i} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "var(--text-dark)" }}>
-                              <CheckCircle2 size={16} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
+                      {!st.isReleased ? (
+                        <span style={{ ...badgeStyle, background: "rgba(12, 36, 80, 0.06)", color: "var(--color-primary)" }}>
+                          🔒 Dibuka {info.openAt} — {formatCountdown(st.releasedAtMs - nowMs)} lagi
+                        </span>
+                      ) : warActive ? (
+                        <span style={{ ...badgeStyle, background: "rgba(239, 68, 68, 0.1)", color: "#b91c1c" }}>
+                          🔥 WAR TIKET BERLANGSUNG ({info.schedule})
+                        </span>
+                      ) : soldOut ? (
+                        <span style={{ ...badgeStyle, background: "rgba(107, 114, 128, 0.12)", color: "#374151" }}>
+                          ❌ SEAT HABIS
+                        </span>
+                      ) : (
+                        <span style={{ ...badgeStyle, background: "rgba(16, 185, 129, 0.12)", color: "#047857" }}>
+                          ✅ Pembelian Terbuka
+                        </span>
+                      )}
+
+                      <div style={{ marginBottom: "22px" }}>
+                        <div className="quota-bar"><span style={{ width: `${pct}%`, background: info.color }} /></div>
+                        <p style={{ fontSize: "12.5px", marginTop: "6px", fontWeight: 700, color: soldOut ? "#dc2626" : "var(--text-muted)" }}>
+                          {soldOut ? "Semua seat sudah terjual" : `Sisa ${st.remaining} dari ${st.total} seat`}
+                        </p>
+                      </div>
+
+                      <div style={{ display: "grid", gap: "10px", marginTop: "auto" }}>
+                        {[personal, couple].filter(Boolean).map((pkg) => {
+                          const need = pkg.seat_type === "couple" ? 2 : 1;
+                          const enabled = canBuy && st.remaining >= need;
+                          return (
+                            <button
+                              key={pkg.id}
+                              className={enabled ? "btn btn-primary" : "btn btn-secondary"}
+                              style={{
+                                width: "100%", padding: "12px 14px",
+                                display: "flex", justifyContent: "space-between", alignItems: "center",
+                                opacity: enabled ? 1 : 0.5,
+                                cursor: enabled ? "pointer" : "not-allowed"
+                              }}
+                              disabled={!enabled}
+                              onClick={() => onSelectPackage(pkg)}
+                            >
+                              <span style={{ fontWeight: 700 }}>
+                                {pkg.seat_type === "couple" ? "Couple (2 orang)" : "Personal (1 orang)"}
+                              </span>
+                              <span style={{ fontWeight: 800 }}>
+                                Rp {parseFloat(pkg.price).toLocaleString("id-ID")}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
+                  );
+                })}
+              </div>
 
-                    <button 
-                      className="btn btn-primary" 
-                      style={{ width: "100%", padding: "12px" }}
-                      onClick={() => onSelectPackage(pkg)}
-                    >
-                      Daftar Sekarang
-                    </button>
+              {/* Peta Kursi Aula (CSS Seat Map) */}
+              <div style={{ maxWidth: "860px", margin: "80px auto 0 auto" }}>
+                <div style={{ textAlign: "center", marginBottom: "28px" }}>
+                  <h3 style={{ fontSize: "clamp(20px, 3vw, 26px)", color: "var(--color-primary)", fontWeight: 700 }}>
+                    Peta Kursi Aula — 300 Seat
+                  </h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "6px" }}>
+                    Denah live: titik terisi = seat sudah diambil peserta lain. Seat bebas memilih posisi di dalam zona masing-masing.
+                  </p>
+                </div>
+
+                <div className="glass-card seat-map" style={{ background: "white", padding: "24px" }}>
+                  <div className="seat-map-stage">🎤 PANGGUNG</div>
+
+                  {["premium", "reguler", "economy"].map((cat) => {
+                    const info = WAR_INFO[cat];
+                    const st = categoryStats[cat] || { total: 100, taken: 0 };
+                    const taken = Math.min(st.taken || 0, st.total);
+                    const half = Math.floor(st.total / 2);
+                    const dot = (isTaken, i) => (
+                      <span key={i} className={`seat-dot${isTaken ? " taken" : ""}`} style={{ borderColor: info.color, background: isTaken ? info.color : "transparent" }} />
+                    );
+                    return (
+                      <div key={cat} className="seat-zone-row" style={{ borderColor: info.color + "77", background: info.color + "0d" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", gap: "8px", flexWrap: "wrap" }}>
+                          <strong style={{ fontSize: "13px", color: "var(--color-primary)" }}>
+                            {info.label} <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>• {info.zone}</span>
+                          </strong>
+                          <span style={{ fontSize: "12px", fontWeight: 800, color: info.color }}>
+                            {st.total - taken} seat kosong
+                          </span>
+                        </div>
+                        <div className="seat-dots-wrap">
+                          <div className="seat-dots">
+                            {Array.from({ length: half }, (_, i) => dot(i < taken, i))}
+                          </div>
+                          <div className="seat-aisle" />
+                          <div className="seat-dots">
+                            {Array.from({ length: st.total - half }, (_, i) => dot(half + i < taken, i))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div className="seat-map-entrance">🚪 PINTU MASUK UTAMA</div>
+
+                  <div className="seat-legend" style={{ marginTop: "14px" }}>
+                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.premium.color, marginRight: "5px" }} />Premium (depan)</span>
+                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.reguler.color, marginRight: "5px" }} />Reguler (tengah)</span>
+                    <span><span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "3px", background: WAR_INFO.economy.color, marginRight: "5px" }} />Economy (belakang)</span>
+                    <span>■ terisi = sudah diambil</span>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+
+                <p style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "12.5px", marginTop: "14px" }}>
+                  *Denah ilustrasi mengikuti layout aula. Seat dalam satu zona bebas dipilih peserta (first come, first served).
+                </p>
+              </div>
+            </React.Fragment>
           )}
         </div>
       </section>

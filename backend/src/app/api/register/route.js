@@ -23,6 +23,48 @@ export async function POST(request) {
       return NextResponse.json({ error: "Paket tidak ditemukan!" }, { status: 404 });
     }
 
+    // 1b. Penegakan war tiket & kuota seat (server-side, jam server WIB-aman)
+    if (selectedPackage.category) {
+      const releasedAtMs = selectedPackage.released_at ? new Date(selectedPackage.released_at).getTime() : 0;
+      if (releasedAtMs > Date.now()) {
+        const openAt = new Date(releasedAtMs).toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
+        });
+        return NextResponse.json({
+          error: `Pembelian kategori ${selectedPackage.category.toUpperCase()} belum dibuka. War tiket dibuka ${openAt} WIB.`
+        }, { status: 403 });
+      }
+
+      let quotaRows = [];
+      try {
+        quotaRows = await query("SELECT category, total_seats FROM ticket_quota");
+      } catch (e) { /* fallback default di bawah */ }
+      const quotaRow = (quotaRows || []).find(q => q.category === selectedPackage.category);
+      const totalSeats = parseInt(quotaRow ? quotaRow.total_seats : "100", 10);
+
+      let allRegs = [];
+      try {
+        allRegs = await query("SELECT package_id, status FROM registrations");
+      } catch (e) { /* fallback: dianggap kosong */ }
+      const catIds = new Set(
+        (packages || []).filter(p => p.category === selectedPackage.category).map(p => String(p.id))
+      );
+      let seatsTaken = 0;
+      for (const r of allRegs || []) {
+        if (!catIds.has(String(r.package_id))) continue;
+        if (r.status === "pending" || r.status === "paid") {
+          const p = (packages || []).find(x => String(x.id) === String(r.package_id));
+          seatsTaken += p && p.seat_type === "couple" ? 2 : 1;
+        }
+      }
+      const seatsNeeded = selectedPackage.seat_type === "couple" ? 2 : 1;
+      if (seatsTaken + seatsNeeded > totalSeats) {
+        return NextResponse.json({
+          error: "Maaf, seat untuk kategori ini sudah HABIS. Silakan pilih kategori tiket lainnya."
+        }, { status: 409 });
+      }
+    }
+
     const basePrice = parseFloat(selectedPackage.price);
     let discount = 0.00;
     let validVoucherCode = null;

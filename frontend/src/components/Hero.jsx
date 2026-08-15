@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Clock, MapPin, Timer, Heart, Users, CheckCircle2 } from "lucide-react";
 
+// Jadwal penting (WIB) — countdown otomatis mengikuti milestone berikutnya
+const MILESTONES = [
+  { at: new Date("2026-08-17T00:00:00+07:00"), label: "Pembukaan War Tiket Economy" },
+  { at: new Date("2026-08-21T00:00:00+07:00"), label: "Pembukaan War Tiket Reguler" },
+  { at: new Date("2026-08-25T00:00:00+07:00"), label: "Pembukaan War Tiket Premium" },
+  { at: new Date("2026-09-09T07:30:00+07:00"), label: "Hari Seminar Sang Maha Cinta" }
+];
+
+function getNextMilestone(now) {
+  for (const m of MILESTONES) {
+    if (now < m.at.getTime()) return m;
+  }
+  return null;
+}
+
 export default function Hero({ setPage }) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -8,27 +23,28 @@ export default function Hero({ setPage }) {
     minutes: 0,
     seconds: 0,
   });
+  const [countdownLabel, setCountdownLabel] = useState("Menuju War Tiket Economy:");
 
   useEffect(() => {
-    // Registration deadline: Thursday, 16 July 2026, 23:59 PM (2 days before event)
-    const targetDate = new Date("2026-07-16T23:59:00").getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetDate - now;
-
-      if (difference <= 0) {
-        clearInterval(interval);
+    const tick = () => {
+      const now = Date.now();
+      const milestone = getNextMilestone(now);
+      if (!milestone) {
+        setCountdownLabel("Semoga bermanfaat — sampai jumpa di lokasi!");
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      } else {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        setTimeLeft({ days, hours, minutes, seconds });
+        return;
       }
-    }, 1000);
+      setCountdownLabel(`Menuju ${milestone.label}:`);
+      const difference = milestone.at.getTime() - now;
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
 
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -103,7 +119,7 @@ export default function Hero({ setPage }) {
                 </div>
                 <div>
                   <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>TANGGAL</p>
-                  <p style={{ fontSize: "14px", fontWeight: 700 }}>Sabtu, 18 Juli 2026</p>
+                  <p style={{ fontSize: "14px", fontWeight: 700 }}>Rabu, 09 September 2026</p>
                 </div>
               </div>
 
@@ -113,7 +129,17 @@ export default function Hero({ setPage }) {
                 </div>
                 <div>
                   <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>WAKTU</p>
-                  <p style={{ fontSize: "14px", fontWeight: 700 }}>07.30 - 16.00 WIB</p>
+                  <p style={{ fontSize: "14px", fontWeight: 700 }}>07.30 - 15.00 WIB</p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", gridColumn: "1 / -1" }}>
+                <div style={{ display: "flex", flexShrink: 0, width: "36px", height: "36px", borderRadius: "50%", background: "rgba(29, 78, 216, 0.08)", color: "var(--color-primary)", alignItems: "center", justifyContent: "center" }}>
+                  <MapPin size={18} />
+                </div>
+                <div>
+                  <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>LOKASI</p>
+                  <p style={{ fontSize: "14px", fontWeight: 700 }}>Masjid At-Tohir (Exit Tol Cimanggis), Kota Depok, Jawa Barat</p>
                 </div>
               </div>
             </div>
@@ -136,7 +162,7 @@ export default function Hero({ setPage }) {
                 alignItems: "center",
                 gap: "6px"
               }}>
-                <Timer size={15} style={{ color: "var(--color-accent)" }} /> Sisa Waktu Pendaftaran:
+                <Timer size={15} style={{ color: "var(--color-accent)" }} /> {countdownLabel}
               </span>
               <div style={{ display: "flex", gap: "12px" }}>
                 {/* Days */}

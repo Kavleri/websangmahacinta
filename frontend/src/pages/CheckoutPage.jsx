@@ -173,9 +173,22 @@ export default function CheckoutPage({ selectedPackage, setPage, setQueryCode })
         {/* Form Pendaftaran Card */}
         <div className="glass-card" style={{ background: "rgba(255, 255, 255, 0.85)" }}>
           <h3 style={{ color: "var(--color-primary)", marginBottom: "8px" }}>Form Registrasi</h3>
-          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "24px" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "12px" }}>
             Isi formulir pendaftaran di bawah ini untuk paket: <strong>{selectedPackage.name}</strong>
           </p>
+          {selectedPackage.category && (
+            <div style={{ background: "rgba(29, 78, 216, 0.06)", border: "1px solid rgba(29, 78, 216, 0.15)", borderRadius: "10px", padding: "10px 14px", marginBottom: "20px", fontSize: "13px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
+              <span style={{ fontWeight: 700, color: "var(--color-primary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Kategori: {selectedPackage.category}
+              </span>
+              <span style={{ color: "var(--text-muted)" }}>
+                Seat diambil: <strong>{selectedPackage.seat_type === "couple" ? "2 seat (couple)" : "1 seat (personal)"}</strong>
+                {typeof selectedPackage.seats_remaining === "number" && (
+                  <> • sisa {selectedPackage.seats_remaining} seat</>
+                )}
+              </span>
+            </div>
+          )}
 
           {error && (
             <div className="glass-card" style={{ borderColor: "#fca5a5", background: "rgba(254, 226, 226, 0.8)", padding: "16px", marginBottom: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
