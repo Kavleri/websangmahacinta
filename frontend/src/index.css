@@ -942,9 +942,12 @@ footer strong {
   transform-style: preserve-3d;
 }
 .seat3d-seat {
+  --sscale: 1;
   position: absolute;
   width: 15px;
   height: 10px;
+  transform: scale(var(--sscale));
+  transform-origin: center;
   border-radius: 3px 3px 1.5px 1.5px;
   background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 55%, #94a3b8 100%);
   border: 1px solid rgba(15, 23, 42, 0.45);
@@ -981,7 +984,7 @@ footer strong {
   background: linear-gradient(180deg, #ffffff 0%, #bae6fd 55%, #38bdf8 100%);
   border-color: #0284c7;
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.9), 0 1.5px 0 rgba(0, 0, 0, 0.35);
-  transform: scale(1.25);
+  transform: scale(calc(var(--sscale, 1) * 1.3));
 }
 /* zona aktif (sedang dipilih) vs zona lain di-redupkan */
 .seat3d-zone.zone-active {
@@ -1108,10 +1111,23 @@ footer strong {
 }
 .seat3d-note b { color: #cbd5e1; }
 
+/* perluas area sentuh kursi yang bisa dipilih (mudah di-tap di HP) */
+.seat3d-seat.pickable::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
 @media (max-width: 620px) {
   .seat3d-scene {
-    height: 380px;
-    perspective: 760px;
+    height: 420px;
+    perspective: 860px;
+  }
+  .seat3d-seat {
+    --sscale: 1.7;
+  }
+  .seat3d-seat.pickable::after {
+    inset: -6px;
   }
   .seat3d-seat {
     width: 9px;

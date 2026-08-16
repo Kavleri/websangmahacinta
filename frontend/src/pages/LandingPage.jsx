@@ -823,6 +823,34 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                   </div>
                 </div>
               </div>
+
+              {/* ===== CTA Penutup ===== */}
+              <section id="cta-section" style={{ marginTop: "88px", padding: "84px 0", background: "linear-gradient(135deg, #0c2450 0%, #153f8a 55%, #1d4ed8 100%)", borderRadius: "24px" }}>
+                <div className="container" style={{ textAlign: "center", color: "white" }}>
+                  <span style={{ display: "inline-block", fontSize: "12px", fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", padding: "7px 16px", borderRadius: "999px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", marginBottom: "20px" }}>
+                    ⏳ War Tiket Sedang Berlangsung
+                  </span>
+                  <h2 style={{ fontSize: "clamp(26px, 4.5vw, 40px)", fontWeight: 800, lineHeight: 1.15, marginBottom: "16px" }}>
+                    Kursimu Menunggu di Aula.<br />Amankan Sebelum Habis.
+                  </h2>
+                  <p style={{ fontSize: "16px", lineHeight: 1.6, opacity: 0.85, maxWidth: "560px", margin: "0 auto 32px auto" }}>
+                    Pilih kursimu sendiri di peta 3D, daftar dalam 2 menit, dan konfirmasi pembayaran
+                    langsung via WhatsApp. Seat diambil peserta lain setiap menitnya.
+                  </p>
+                  <a
+                    href="#packages-section"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "white", color: "#153f8a", fontWeight: 800, fontSize: "17px", padding: "16px 36px", borderRadius: "14px", textDecoration: "none", boxShadow: "0 12px 30px rgba(0,0,0,0.25)" }}
+                  >
+                    🎟️ Pilih Kursi &amp; Amankan Tiket
+                  </a>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 28px", justifyContent: "center", marginTop: "36px", fontSize: "13.5px", opacity: 0.85 }}>
+                    <span>💺 300 seat terbatas</span>
+                    <span>🎤 3 narasumber pilihan</span>
+                    <span>📍 Masjid At-Tohir, Depok</span>
+                    <span>🗓️ Rabu, 09 September 2026</span>
+                  </div>
+                </div>
+              </section>
             </React.Fragment>
           )}
         </div>
