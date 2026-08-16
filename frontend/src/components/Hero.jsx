@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Clock, MapPin, Timer, Heart, Users, CheckCircle2 } from "lucide-react";
 
 // Jadwal penting (WIB) — countdown otomatis mengikuti milestone berikutnya
+// (War Economy sudah BERLANGSUNG sejak 16 Agustus 00.00 WIB)
 const MILESTONES = [
-  { at: new Date("2026-08-17T00:00:00+07:00"), label: "Pembukaan War Tiket Economy" },
   { at: new Date("2026-08-21T00:00:00+07:00"), label: "Pembukaan War Tiket Reguler" },
   { at: new Date("2026-08-25T00:00:00+07:00"), label: "Pembukaan War Tiket Premium" },
+  { at: new Date("2026-08-28T23:59:59+07:00"), label: "Penutupan War Tiket Premium" },
   { at: new Date("2026-09-09T07:30:00+07:00"), label: "Hari Seminar Sang Maha Cinta" }
 ];
 
@@ -23,7 +24,7 @@ export default function Hero({ setPage }) {
     minutes: 0,
     seconds: 0,
   });
-  const [countdownLabel, setCountdownLabel] = useState("Menuju War Tiket Economy:");
+  const [countdownLabel, setCountdownLabel] = useState("Memuat jadwal penting...");
 
   useEffect(() => {
     const tick = () => {
