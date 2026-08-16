@@ -1166,3 +1166,68 @@ footer strong {
 /* Anchor navigation: target tidak ketutup navbar sticky + halus */
 html { scroll-behavior: smooth; }
 section[id] { scroll-margin-top: 92px; }
+
+/* ============================================================
+   PETA PILIH KURSI LAYAR PENUH (HP) — kursi besar untuk jari
+   ============================================================ */
+.seat-picker-fs {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0e1a2e;
+  display: flex;
+  flex-direction: column;
+}
+.seat-picker-fs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: #0b1526;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  color: #fff;
+}
+.seat3d-panwrap {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: flex-start;
+}
+.seat3d-pan {
+  width: 250%;
+  min-width: 250%;
+  flex-shrink: 0;
+}
+.seat3d-fs {
+  border-radius: 0;
+  padding: 10px;
+}
+.seat3d-fs .seat3d-scene {
+  height: 62vh;
+  min-height: 480px;
+}
+.seat3d-fs .seat3d-seat {
+  --sscale: 2.5;
+}
+.seat3d-fs .seat3d-seat.pickable::after {
+  inset: -9px;
+}
+.seat3d-fs .seat3d-plate {
+  font-size: 13px;
+  padding: 4px 16px;
+}
+.seat3d-fs .seat3d-legend,
+.seat3d-fs .seat3d-note {
+  font-size: 13px;
+}
+.seat-picker-fs-footer {
+  position: sticky;
+  bottom: 0;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: #0b1526;
+  border-top: 1px solid rgba(212, 175, 55, 0.25);
+}

@@ -29,6 +29,21 @@ export default function LandingPage({ onSelectPackage, setPage }) {
   const [seatPick, setSeatPick] = useState(null);
   const [seatSel, setSeatSel] = useState([]);
   const [seatError, setSeatError] = useState(null);
+  // HP => peta pilih kursi dibuka layar penuh (kursi besar, geser kiri-kanan)
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia ? window.matchMedia("(max-width: 620px)").matches : false);
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia("(max-width: 620px)");
+    const fn = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = seatPick && isMobile ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [seatPick, isMobile]);
   const [usingCache, setUsingCache] = useState(false);
 
   const CACHE_KEY = "dutaqu_packages_cache_v1";
@@ -124,10 +139,12 @@ export default function LandingPage({ onSelectPackage, setPage }) {
     setSeatPick({ cat, seatType, pkg });
     setSeatSel([]);
     setSeatError(null);
-    setTimeout(() => {
-      const el = document.getElementById("seat-map-section");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 60);
+    if (!window.matchMedia || !window.matchMedia("(max-width: 620px)").matches) {
+      setTimeout(() => {
+        const el = document.getElementById("seat-map-section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+    }
   };
 
   // Klik kursi di peta (hanya zona aktif, kursi kosong)
@@ -296,8 +313,9 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 borderRadius: "50%",
                 margin: "0 auto 20px auto",
                 overflow: "hidden",
-                border: "4px solid rgba(37, 99, 235, 0.15)",
-                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
+                border: "4px solid var(--color-primary)",
+                boxShadow: "0 10px 26px rgba(12, 36, 80, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.3)",
+                background: "white"
               }}>
                 <img src="/speakers/indra-noveldy.jpg" alt="Coach Indra Noveldy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
@@ -316,8 +334,9 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 borderRadius: "50%",
                 margin: "0 auto 20px auto",
                 overflow: "hidden",
-                border: "4px solid rgba(37, 99, 235, 0.15)",
-                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
+                border: "4px solid var(--color-primary)",
+                boxShadow: "0 10px 26px rgba(12, 36, 80, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.3)",
+                background: "white"
               }}>
                 <img src="/speakers/abi-heru.jpg" alt="Abi Heru Arrasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
@@ -336,8 +355,9 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 borderRadius: "50%",
                 margin: "0 auto 20px auto",
                 overflow: "hidden",
-                border: "4px solid rgba(37, 99, 235, 0.15)",
-                boxShadow: "0 8px 20px rgba(12, 36, 80, 0.12)"
+                border: "4px solid var(--color-primary)",
+                boxShadow: "0 10px 26px rgba(12, 36, 80, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.3)",
+                background: "white"
               }}>
                 <img src="/speakers/ummi-rasyid.jpg" alt="Ummi Rasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
@@ -787,6 +807,52 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                   />
                 </div>
               </div>
+
+              {/* ===== Peta pilih kursi LAYAR PENUH untuk HP ===== */}
+              {seatPick && isMobile && (
+                <div className="seat-picker-fs">
+                  <div className="seat-picker-fs-header">
+                    <span style={{ fontSize: "13px", fontWeight: 800, padding: "6px 14px", borderRadius: "999px", background: WAR_INFO[seatPick.cat].color + "1a", color: WAR_INFO[seatPick.cat].color, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      {WAR_INFO[seatPick.cat].label} • {seatPick.seatType === "couple" ? "Couple (2 kursi)" : "Personal (1 kursi)"}
+                    </span>
+                    <span style={{ fontSize: "12.5px", color: "var(--text-muted)" }}>
+                      {seatSel.length > 0 ? "Kursi: " + seatSel.map((n) => seatLabel(seatPick.cat, n)).join(" + ") : "Ketuk kursi putih untuk memilih"}
+                    </span>
+                    <button className="btn btn-secondary" style={{ padding: "7px 14px", fontSize: "13px", borderRadius: "10px" }} onClick={() => { setSeatPick(null); setSeatSel([]); setSeatError(null); }}>
+                      ✕ Tutup
+                    </button>
+                  </div>
+
+                  <div className="seat3d-panwrap">
+                    <div className="seat3d-pan">
+                      <SeatMap3D
+                        wrapClass="seat3d-fs"
+                        seatsMaps={seatsMaps}
+                        selectMode={{ cat: seatPick.cat, need: seatPick.seatType === "couple" ? 2 : 1 }}
+                        selected={seatSel}
+                        onSeatClick={handleSeatClick}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="seat-picker-fs-footer">
+                    {seatError && <p style={{ color: "#b91c1c", fontSize: "12.5px", margin: "0 0 8px 0", textAlign: "center" }}>⚠️ {seatError}</p>}
+                    {seatSel.length > 0 ? (
+                      <button
+                        className="btn btn-primary"
+                        style={{ width: "100%", padding: "14px", fontSize: "16px", fontWeight: 800 }}
+                        onClick={() => onSelectPackage(seatPick.pkg, { cat: seatPick.cat, seatType: seatPick.seatType, seats: seatSel })}
+                      >
+                        ✅ Lanjut Isi Data &amp; Bayar via WA ({seatSel.map((n) => seatLabel(seatPick.cat, n)).join(" + ")})
+                      </button>
+                    ) : (
+                      <p style={{ textAlign: "center", fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
+                        👆 Geser peta ke kiri-kanan, lalu ketuk kursi kosong (putih) untuk memilih
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Video & Foto Ruangan Asli (Masjid At-Tohir) */}
               <div style={{ maxWidth: "860px", margin: "56px auto 0 auto" }}>

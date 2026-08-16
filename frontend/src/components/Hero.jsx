@@ -6,7 +6,7 @@ import { Calendar, Clock, MapPin, Timer, Heart, Users, CheckCircle2 } from "luci
 const MILESTONES = [
   { at: new Date("2026-08-21T00:00:00+07:00"), label: "Pembukaan War Tiket Reguler" },
   { at: new Date("2026-08-25T00:00:00+07:00"), label: "Pembukaan War Tiket Premium" },
-  { at: new Date("2026-08-28T23:59:59+07:00"), label: "Penutupan War Tiket Premium" },
+  { at: new Date("2026-08-28T23:59:59+07:00"), label: "Penutupan Pendaftaran Tiket (Semua Kategori)" },
   { at: new Date("2026-09-09T07:30:00+07:00"), label: "Hari Seminar Sang Maha Cinta" }
 ];
 

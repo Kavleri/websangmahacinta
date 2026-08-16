@@ -47,7 +47,7 @@ export function buildStates(map) {
   return st;
 }
 
-export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected = [], onSeatClick }) {
+export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected = [], onSeatClick, wrapClass = "" }) {
   const zoneState = (cat) => {
     const st = categoryFreeCount(cat, seatsMaps[cat]);
     return st;
@@ -58,7 +58,7 @@ export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected 
   };
 
   return (
-    <div className="seat3d-wrap">
+    <div className={`seat3d-wrap${wrapClass ? " " + wrapClass : ""}`}>
       <div className="seat3d-scene">
         <div className="seat3d-world">
 
