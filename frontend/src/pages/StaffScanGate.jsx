@@ -471,6 +471,22 @@ export default function StaffScanGate() {
                     <div style={{ fontSize: "14px", color: "#047857", display: "flex", flexDirection: "column", gap: "6px" }}>
                       <div><strong>Nama Tamu:</strong> {scanResult.guest.name}</div>
                       <div><strong>Paket:</strong> {scanResult.guest.package_name}</div>
+                      {(() => {
+                        const g = scanResult.guest;
+                        if (!g || !g.seat_numbers) return null;
+                        let seats = null;
+                        try {
+                          const arr = typeof g.seat_numbers === "string" ? JSON.parse(g.seat_numbers) : g.seat_numbers;
+                          if (Array.isArray(arr) && arr.length > 0) seats = arr;
+                        } catch (e) {}
+                        if (!seats) return null;
+                        const c = (g.category || "x").charAt(0).toUpperCase();
+                        return (
+                          <div style={{ fontSize: "15px", fontWeight: 800, color: "#0369a1", background: "#e0f2fe", border: "1px solid #7dd3fc", borderRadius: "8px", padding: "6px 10px", display: "inline-block" }}>
+                            💺 Kursi: {seats.map((n) => `${c}-${n + 1}`).join(" + ")} • {g.seat_type === "couple" ? "2 seat (couple)" : "1 seat (personal)"}
+                          </div>
+                        );
+                      })()}
                       <div><strong>WhatsApp:</strong> {scanResult.guest.whatsapp}</div>
                       <div><strong>Jam Check-In:</strong> {new Date(scanResult.guest.checked_in_at).toLocaleTimeString("id-ID")}</div>
                     </div>

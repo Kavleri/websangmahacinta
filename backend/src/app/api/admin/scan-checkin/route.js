@@ -77,7 +77,7 @@ export async function POST(request) {
     // 5. Perform check-in
     const nowISO = new Date().toISOString();
     await query(
-      "UPDATE registrations SET checked_in = 1, checked_in_at = ? WHERE registration_code = ?",
+      "UPDATE registrations SET checked_in = TRUE, checked_in_at = ? WHERE registration_code = ?",
       [nowISO, finalCode]
     );
 
@@ -92,6 +92,9 @@ export async function POST(request) {
         name: reg.name,
         whatsapp: reg.whatsapp,
         package_name: pkg ? pkg.name : "Paket Tidak Diketahui",
+        category: pkg ? pkg.category : null,
+        seat_type: pkg ? pkg.seat_type : null,
+        seat_numbers: reg.seat_numbers || null,
         checked_in_at: nowISO
       }
     });

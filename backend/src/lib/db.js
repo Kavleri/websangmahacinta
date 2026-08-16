@@ -16,7 +16,6 @@ function getResolvedConnectionString() {
 const connectionString = getResolvedConnectionString();
 
 let pool = null;
-let useFallback = false;
 
 // Fallback JSON DB setup
 const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
@@ -175,14 +174,9 @@ try {
   console.log("[db] mode:", isSupabase ? "PostgreSQL (Supabase)" : "PostgreSQL (local)");
 } catch (err) {
   console.warn("PostgreSQL pool creation failed. Switching to JSON file fallback database.", err.message);
-  useFallback = true;
 }
 
 export async function query(sql, params = []) {
-  if (useFallback) {
-    return handleFallbackQuery(sql, params);
-  }
-
   try {
     // Convert SQL '?' to '$1, $2, ...' for pg compatible placeholder queries
     let index = 1;
@@ -204,9 +198,7 @@ export async function query(sql, params = []) {
       client.release();
     }
   } catch (err) {
-    console.warn("PostgreSQL Query error. Attempting JSON fallback database.", err.message);
-    useFallback = true;
-    initFallbackDb();
+    console.warn("PostgreSQL Query error, fallback per query ini saja:", err.message);
     return handleFallbackQuery(sql, params);
   }
 }
@@ -289,7 +281,7 @@ function handleFallbackQuery(sql, params) {
       }
     }
 
-    if (sqlNormalized.includes("checked_in = 1") && sqlNormalized.includes("checked_in_at = ?") && sqlNormalized.includes("registration_code = ?")) {
+    if ((sqlNormalized.includes("checked_in = 1") || sqlNormalized.includes("checked_in = true")) && sqlNormalized.includes("checked_in_at = ?") && sqlNormalized.includes("registration_code = ?")) {
       const checked_in_at = params[0];
       const code = params[1];
       const index = db.registrations.findIndex(r => r.registration_code === code);
