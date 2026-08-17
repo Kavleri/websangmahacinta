@@ -1022,7 +1022,7 @@ footer strong {
 .seat3d-pillar {
   position: absolute;
   width: 20px;
-  height: 34%;
+  height: 26%;
   transform-origin: 50% 100%;
   transform: rotateX(calc(var(--tilt) * -1));
   border-radius: 5px 5px 2px 2px;
@@ -1043,10 +1043,10 @@ footer strong {
 }
 /* Lorong tengah: left 39% - 61%. Tiang mengapit lorong di batas zona
    (premium|reguler ~ top 36%, reguler|economy ~ top 64.5%) */
-.pl1 { left: 35.5%; top: 36%; }
-.pr1 { left: 60.5%; top: 36%; }
-.pl2 { left: 35.5%; top: 64.5%; }
-.pr2 { left: 60.5%; top: 64.5%; }
+.pl1 { left: 42.5%; top: 15%; }
+.pr1 { left: 55%; top: 15%; }
+.pl2 { left: 42.5%; top: 41.5%; }
+.pr2 { left: 55%; top: 41.5%; }
 
 /* --- pintu masuk utama (berdiri di sisi dekat pengunjung) --- */
 .seat3d-entrance {
