@@ -80,8 +80,8 @@ export async function POST(request) {
         }
         if (seatsNeededSel === 2) {
           const pair = seats.slice().sort((a, b) => a - b);
-          const sameRow = Math.floor(pair[0] / 20) === Math.floor(pair[1] / 20);
-          const adjacentSameBlock = pair[1] === pair[0] + 1 && pair[0] % 20 !== 9; // col 9 = ujung blok kiri (seberang lorong)
+          const sameRow = Math.floor(pair[0] / 15) === Math.floor(pair[1] / 15);
+          const adjacentSameBlock = pair[1] === pair[0] + 1 && pair[0] % 15 !== 6 && pair[0] % 15 !== 14; // kolom 6 & 14 = ujung blok (seberang lorong tengah)
           if (!sameRow || !adjacentSameBlock) {
             return NextResponse.json({ error: "Kursi couple harus 2 kursi berdampingan pada baris yang sama." }, { status: 400 });
           }

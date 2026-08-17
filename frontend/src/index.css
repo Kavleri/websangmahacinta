@@ -922,8 +922,8 @@ footer strong {
 /* --- lorong tengah (karpet merah, trim emas tipis) --- */
 .seat3d-aisle {
   position: absolute;
-  left: 39%;
-  width: 22%;
+  left: 39.5%;
+  width: 19%;
   top: 12%;
   bottom: 2%;
   border-radius: 6px;
@@ -1043,10 +1043,10 @@ footer strong {
 }
 /* Lorong tengah: left 39% - 61%. Tiang mengapit lorong di batas zona
    (premium|reguler ~ top 36%, reguler|economy ~ top 64.5%) */
-.pl1 { left: 34.5%; top: 36%; }
-.pr1 { left: 61.8%; top: 36%; }
-.pl2 { left: 34.5%; top: 64.5%; }
-.pr2 { left: 61.8%; top: 64.5%; }
+.pl1 { left: 35.5%; top: 36%; }
+.pr1 { left: 60.5%; top: 36%; }
+.pl2 { left: 35.5%; top: 64.5%; }
+.pr2 { left: 60.5%; top: 64.5%; }
 
 /* --- pintu masuk utama (berdiri di sisi dekat pengunjung) --- */
 .seat3d-entrance {

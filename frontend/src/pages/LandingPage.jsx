@@ -153,8 +153,8 @@ export default function LandingPage({ onSelectPackage, setPage }) {
     const states = buildStates(seatsMaps[cat]);
     let pick = [idx];
     if (seatPick.seatType === "couple") {
-      const col = idx % 20; // kolom 0-9 blok kiri, 10-19 blok kanan (9 & 19 = ujung blok)
-      pick = col === 9 || col === 19 ? [idx - 1, idx] : [idx, idx + 1];
+      const col = idx % 15; // kolom 0-6 blok kiri, 7-14 blok kanan (6 & 14 = ujung blok, seberang lorong)
+      pick = col === 6 || col === 14 ? [idx - 1, idx] : [idx, idx + 1];
     }
     const bad = pick.filter((n) => n < 0 || n > 99 || states[n] !== "free");
     if (bad.length > 0) {

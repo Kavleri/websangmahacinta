@@ -18,16 +18,19 @@ const ZONES = [
   { cat: "reguler", label: "REGULER", color: "#2563eb", dark: "#1d4ed8" },
   { cat: "economy", label: "ECONOMY", color: "#10b981", dark: "#047857" }
 ];
-const ROWS = 5;
-const PER_ROW = 20;
+// Layout sesuai diagram aula 25x25m: tiap zona 15 kursi/baris = 7 kiri + 8 kanan
+// (dipisah lorong tengah 2,5m), 7 baris (15x7=105 -> disesuaikan 100), lorong samping 2,5m.
+const ROWS = 7;
+const PER_ROW = 15;
 const ZONE_TOP = [13, 41, 69];
 const ZONE_H = 26;
 
 export const seatLabel = (cat, idx) => `${(cat || "x").charAt(0).toUpperCase()}-${idx + 1}`;
 
+// Blok kiri kolom 0-6 (x 8-36%), lorong tengah (40-58%), blok kanan kolom 7-14 (x 60-92%)
 function seatPos(col, row) {
-  const x = col < 10 ? 4 + col * 3.2 : 63 + (col - 10) * 3.2;
-  const y = 13 + row * 17;
+  const x = col < 7 ? 8 + col * 4.7 : 60 + (col - 7) * 4.4;
+  const y = 10 + row * 12.2;
   return { x, y };
 }
 
