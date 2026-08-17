@@ -165,6 +165,31 @@ export default function AdminConsole() {
 
   // Receipt modal state
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedReceiptName, setSelectedReceiptName] = useState("bukti-transfer.jpg");
+
+  const proofExt = (dataUri) => {
+    const m = /data:image\/(jpeg|png|webp)/.exec(dataUri || "");
+    return m ? (m[1] === "jpeg" ? "jpg" : m[1]) : "jpg";
+  };
+
+  const handleDownloadAllProofs = () => {
+    const withProof = registrations.filter((r) => r.payment_proof);
+    if (withProof.length === 0) {
+      alert("Belum ada pendaftar yang mengunggah bukti transfer.");
+      return;
+    }
+    if (!confirm(`Unduh ${withProof.length} bukti transfer? (Browser akan meminta izin mengunduh beberapa file)`)) return;
+    withProof.forEach((r, i) => {
+      setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = r.payment_proof;
+        a.download = `bukti_${r.registration_code}.${proofExt(r.payment_proof)}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }, i * 400);
+    });
+  };
 
   // Package editor states
   const [editingPkg, setEditingPkg] = useState(null);
@@ -871,8 +896,16 @@ export default function AdminConsole() {
             </div>
             
             {/* Status Filter */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-muted)" }}>Filter:</span>
+              <button
+                className="btn btn-secondary"
+                style={{ fontSize: "13px", padding: "8px 14px", borderRadius: "10px" }}
+                onClick={handleDownloadAllProofs}
+                title="Unduh semua bukti transfer yang sudah diunggah pendaftar"
+              >
+                Unduh Semua Bukti TF
+              </button>
               <select 
                 className="form-control" 
                 style={{ padding: "8px 16px", width: "auto" }}
@@ -957,7 +990,7 @@ export default function AdminConsole() {
                         </span>
                         {reg.payment_proof ? (
                           <button 
-                            onClick={() => setSelectedReceipt(reg.payment_proof)}
+                            onClick={() => { setSelectedReceipt(reg.payment_proof); setSelectedReceiptName(`bukti_${reg.registration_code}.${proofExt(reg.payment_proof)}`); }}
                             style={{ display: "block", fontSize: "11px", color: "var(--color-primary)", border: "none", background: "none", cursor: "pointer", marginTop: "6px", textDecoration: "underline" }}
                           >
                             Lihat Bukti Transfer
@@ -1475,13 +1508,23 @@ export default function AdminConsole() {
                 style={{ maxWidth: "100%", height: "auto", borderRadius: "6px" }} 
               />
             </div>
-            <button 
-              className="btn btn-secondary" 
-              style={{ marginTop: "16px", width: "100%" }}
-              onClick={() => setSelectedReceipt(null)}
-            >
-              Tutup
-            </button>
+            <div style={{ marginTop: "16px", display: "flex", gap: "10px" }}>
+              <a
+                href={selectedReceipt}
+                download={selectedReceiptName}
+                className="btn btn-primary"
+                style={{ flex: 1, textAlign: "center", textDecoration: "none" }}
+              >
+                Unduh Bukti
+              </a>
+              <button 
+                className="btn btn-secondary" 
+                style={{ flex: 1 }}
+                onClick={() => setSelectedReceipt(null)}
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
