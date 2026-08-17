@@ -953,7 +953,7 @@ export default function AdminConsole() {
                       </td>
                       <td style={{ padding: "14px 12px" }}>
                         <span className={`status-badge status-${reg.status}`} style={{ fontSize: "11px", padding: "4px 10px" }}>
-                          {reg.status}
+                          {reg.status === "paid" ? "CONFIRMED ✓" : reg.status === "pending" ? "BOOKING — menunggu verifikasi" : reg.status === "rejected" ? "DITOLAK" : reg.status}
                         </span>
                         {reg.payment_proof ? (
                           <button 

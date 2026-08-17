@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Info, ShieldAlert, CheckCircle, Upload, ArrowLeft, Send } from "lucide-react";
-import { API_BASE } from "../apiConfig";
+import { API_BASE, VERCEL_BASE } from "../apiConfig";
 
 export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, setQueryCode }) {
   const seatLabels = selectedSeat && selectedSeat.seats
@@ -27,6 +27,8 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  // Alur baru: pilih file -> SUBMIT -> tersimpan -> halaman terima kasih -> konfirmasi WA
+  const [submitted, setSubmitted] = useState(false);
 
   if (!selectedPackage) {
     return (
@@ -105,31 +107,54 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
     setUploadError(null);
   };
 
-  const handleUpload = async (e) => {
+  // Kompres foto di browser (max sisi 1280px, JPEG) supaya ringan di-upload
+  const compressImage = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1280;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width >= height) { height = Math.round(height * MAX / width); width = MAX; }
+          else { width = Math.round(width * MAX / height); height = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (!blob) return reject(new Error("Gagal memproses gambar."));
+          resolve(new File([blob], "bukti-transfer.jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", 0.82);
+      };
+      img.onerror = () => reject(new Error("File bukan gambar yang valid."));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error("Gagal membaca file."));
+    reader.readAsDataURL(file);
+  });
+
+  // SUBMIT: simpan bukti TF ke sistem -> lanjut halaman terima kasih
+  const handleSubmitProof = async (e) => {
     e.preventDefault();
     if (!selectedFile || !regData) return;
 
     setUploading(true);
     setUploadError(null);
-
-    const uploadFormData = new FormData();
-    uploadFormData.append("file", selectedFile);
-    uploadFormData.append("registration_code", regData.registration_code);
-
     try {
-      const response = await fetch(`${API_BASE}/api/upload-proof`, {
-        method: "POST",
-        body: uploadFormData,
-      });
+      const compressed = await compressImage(selectedFile);
+      const fd = new FormData();
+      fd.append("file", compressed);
+      fd.append("registration_code", regData.registration_code);
 
+      const response = await fetch(`${VERCEL_BASE}/api/upload-proof`, { method: "POST", body: fd });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Gagal mengunggah bukti transfer.");
-      }
+      if (!response.ok) throw new Error(data.error || "Gagal menyimpan bukti transfer.");
 
       setUploadSuccess(true);
-      // Update local status representation if successful
       setRegData({ ...regData, payment_proof: data.payment_proof });
+      setSubmitted(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setUploadError(err.message);
     } finally {
@@ -398,40 +423,58 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
               )}
 
               {uploadSuccess ? (
-                <div style={{ background: "#d1fae5", color: "#065f46", padding: "12px", borderRadius: "8px", fontSize: "13px", display: "flex", gap: "8px", alignItems: "center", marginBottom: "16px" }}>
-                  <CheckCircle size={18} /> Bukti transfer berhasil diunggah!
+                <div style={{ background: "#d1fae5", color: "#065f46", padding: "14px", borderRadius: "10px", fontSize: "14px", display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px", fontWeight: 700 }}>
+                  <CheckCircle size={18} /> Bukti transfer TERSIMPAN di sistem.
                 </div>
               ) : (
-                <form onSubmit={handleUpload} style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+                <form onSubmit={handleSubmitProof} style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "8px" }}>
                   <input 
                     type="file" 
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleFileChange} 
                     style={{ fontSize: "13px", width: "100%" }}
                     required
                   />
-                  <button type="submit" className="btn btn-secondary" style={{ padding: "8px", fontSize: "14px", alignSelf: "flex-start" }} disabled={uploading || !selectedFile}>
-                    <Upload size={16} /> {uploading ? "Mengunggah..." : "Unggah Bukti"}
+                  <button type="submit" className="btn btn-primary" style={{ padding: "13px", fontSize: "15px", width: "100%", fontWeight: 800 }} disabled={uploading || !selectedFile}>
+                    <Upload size={18} /> {uploading ? "Menyimpan Bukti Transfer..." : "SUBMIT — Simpan Bukti Transfer"}
                   </button>
+                  <p style={{ fontSize: "11.5px", color: "var(--text-muted)", margin: 0 }}>
+                    Foto otomatis dikompres. Setelah submit, lanjut konfirmasi ke admin via WhatsApp.
+                  </p>
                 </form>
               )}
             </div>
+          </div>
+        )}
 
-            {/* WA Notification Confirmation Button */}
-            <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "20px" }}>
-              <p style={{ fontSize: "13px", color: "var(--text-muted)", marginBottom: "12px" }}>
-                Setelah mentransfer dan mengunggah bukti, konfirmasikan ke admin WhatsApp untuk aktivasi tiket Anda secara cepat:
-              </p>
-              <a 
-                href={getWhatsAppLink()} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn btn-whatsapp" 
-                style={{ width: "100%", padding: "12px" }}
-              >
-                <Send size={18} /> Konfirmasi ke Admin (WA)
-              </a>
+        {/* ===== HALAMAN TERIMA KASIH (muncul setelah SUBMIT) ===== */}
+        {regData && submitted && (
+          <div className="glass-card" style={{ background: "rgba(255,255,255,0.95)", gridColumn: "1 / -1", textAlign: "center", padding: "40px 28px" }}>
+            <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "#d1fae5", color: "#059669", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
+              <CheckCircle size={38} />
             </div>
+            <h3 style={{ color: "var(--color-primary)", marginBottom: "10px" }}>Terima Kasih, {regData.name}! 🎉</h3>
+            <p style={{ fontSize: "15px", lineHeight: 1.6, color: "var(--text-dark)", maxWidth: "460px", margin: "0 auto 22px auto" }}>
+              Pemesanan tiket Anda <b>dalam proses verifikasi</b>. Silakan melakukan
+              <b> konfirmasi pembayaran</b> melalui link berikut agar admin segera memeriksa bukti transfer Anda:
+            </p>
+            <a 
+              href={getWhatsAppLink()} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn btn-whatsapp" 
+              style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "14px 30px", fontSize: "16px", fontWeight: 800 }}
+            >
+              <Send size={18} /> Konfirmasi Pembayaran ke Admin
+            </a>
+            <div style={{ marginTop: "26px", fontSize: "13px", color: "var(--text-muted)", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <span>Kode Registrasi: <b style={{ color: "var(--color-primary)" }}>{regData.registration_code}</b></span>
+              {seatLabels && <span>Kursi Anda: <b style={{ color: "#0369a1" }}>{seatLabels}</b> (dikunci selama verifikasi)</span>}
+              <span>Status saat ini: <b style={{ color: "#7c3aed" }}>Menunggu verifikasi admin</b></span>
+            </div>
+            <button className="btn btn-secondary" style={{ marginTop: "24px", padding: "10px 22px" }} onClick={handleCheckTicket}>
+              Lihat Detail Status Tiket
+            </button>
           </div>
         )}
       </div>

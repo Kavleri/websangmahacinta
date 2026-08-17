@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import fs from "fs";
-import path from "path";
 
-// POST /api/upload-proof
+// POST /api/upload-proof — simpan bukti transfer sebagai data-URI di database.
+// (Filesystem Vercel read-only, file fisik tidak persisten — DB adalah sumber kebenaran.)
+const MAX_BYTES = 1_500_000; // ~1.5MB
+const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -13,55 +25,37 @@ export async function POST(request) {
     if (!file || !regCode) {
       return NextResponse.json({ error: "File bukti transfer dan Kode Registrasi wajib diunggah!" }, { status: 400 });
     }
+    if (file.type && !ALLOWED.includes(file.type)) {
+      return NextResponse.json({ error: "Format file harus JPG, PNG, atau WebP." }, { status: 400 });
+    }
 
-    // Validate registration exists
     const registrations = await query(
       "SELECT * FROM registrations WHERE registration_code = ?",
       [regCode]
     );
-
     if (!registrations || registrations.length === 0) {
       return NextResponse.json({ error: "Kode registrasi tidak ditemukan!" }, { status: 404 });
     }
 
-    // File buffer extraction
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Save directory configuration
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (bytes.byteLength > MAX_BYTES) {
+      return NextResponse.json({ error: "Ukuran file maksimal 1.5MB. Silakan kecilkan dulu." }, { status: 400 });
     }
 
-    // Generate safe filename
-    const fileExtension = file.name.split(".").pop();
-    const safeFilename = `proof_${regCode}_${Date.now()}.${fileExtension}`;
-    const filePath = path.join(uploadDir, safeFilename);
+    const b64 = Buffer.from(bytes).toString("base64");
+    const dataUri = `data:${file.type || "image/jpeg"};base64,${b64}`;
 
-    // Write file to path
-    fs.writeFileSync(filePath, buffer);
-
-    // Save relative path for frontend access (served statically by Next.js)
-    const publicPath = `/uploads/${safeFilename}`;
-
-    // Update DB
     await query(
       "UPDATE registrations SET payment_proof = ? WHERE registration_code = ?",
-      [publicPath, regCode]
+      [dataUri, regCode]
     );
 
     return NextResponse.json({
       success: true,
-      message: "Bukti transfer berhasil diunggah!",
-      payment_proof: publicPath
-    });
+      message: "Bukti transfer berhasil disimpan!",
+      payment_proof: dataUri
+    }, { headers: CORS });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: CORS });
   }
 }
-export const config = {
-  api: {
-    bodyParser: false, // Disallow standard parsing to allow file data streaming
-  },
-};
