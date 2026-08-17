@@ -827,6 +827,7 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                     <div className="seat3d-pan">
                       <SeatMap3D
                         wrapClass="seat3d-fs"
+                        flat
                         seatsMaps={seatsMaps}
                         selectMode={{ cat: seatPick.cat, need: seatPick.seatType === "couple" ? 2 : 1 }}
                         selected={seatSel}

@@ -1114,24 +1114,17 @@ footer strong {
 }
 .seat3d-note b { color: #cbd5e1; }
 
-/* perluas area sentuh kursi yang bisa dipilih (mudah di-tap di HP) */
-.seat3d-seat.pickable::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-}
+
 
 @media (max-width: 620px) {
   .seat3d-scene {
-    height: 420px;
+    height: 560px;
     perspective: 860px;
   }
   .seat3d-seat {
-    --sscale: 1.7;
+    --sscale: 1.25;
   }
-  .seat3d-seat.pickable::after {
-    inset: -6px;
-  }
+
   .seat3d-seat {
     width: 9px;
     height: 6px;
@@ -1209,16 +1202,49 @@ section[id] { scroll-margin-top: 92px; }
   border-radius: 0;
   padding: 10px;
 }
+/* FULLSCREEN = MODE DENAH 2D FLAT (top-down): perspektif 3D memuat baris
+   belakang menutupi baris depan (paint order) -> sulit di-tap jari.
+   Flat = semua kursi sejajar & akurat, pas untuk pemilihan di HP. */
 .seat3d-fs .seat3d-scene {
-  height: 62vh;
-  min-height: 480px;
+  height: auto;
+  min-height: 0;
+  perspective: none;
+}
+.seat3d-fs .seat3d-world {
+  transform: none;
+  position: relative;
+  height: 760px;  /* 7 baris x 3 zona renggang */
+  width: 100%;
+  left: 0;
+  right: 0;
+}
+.seat3d-fs .seat3d-backwall,
+.seat3d-fs .seat3d-dome,
+.seat3d-fs .seat3d-stage-face,
+.seat3d-fs .seat3d-stage-skirt {
+  display: none;
+}
+.seat3d-fs .seat3d-stage {
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 7%;
+}
+.seat3d-fs .seat3d-stage-top {
+  border-radius: 8px;
 }
 .seat3d-fs .seat3d-seat {
-  --sscale: 2.5;
+  --sscale: 1.25; /* ~19x12px visual, target efektif baris 13.4% zona */
 }
-.seat3d-fs .seat3d-seat.pickable::after {
-  inset: -9px;
+/* zona flat: tiga band horizontal */
+.seat3d-fs .seat3d-zone {
+  height: 26%;
 }
+.seat3d-fs .seat3d-plate {
+  transform: translateX(-50%);
+}
+
 .seat3d-fs .seat3d-plate {
   font-size: 13px;
   padding: 4px 16px;

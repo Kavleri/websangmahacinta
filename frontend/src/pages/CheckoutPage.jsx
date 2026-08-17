@@ -154,7 +154,10 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
       setUploadSuccess(true);
       setRegData({ ...regData, payment_proof: data.payment_proof });
       setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        const el = document.getElementById("thanks-section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 80);
     } catch (err) {
       setUploadError(err.message);
     } finally {
@@ -335,23 +338,23 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
               </button>
             </form>
           ) : (
-            <div style={{ textAlign: "center", padding: "20px 0" }}>
-              <div style={{ color: "#10b981", background: "#d1fae5", width: "60px", height: "60px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-                <CheckCircle size={32} />
+            <div style={{ padding: "8px 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "#d1fae5", border: "1px solid #a7f3d0", borderRadius: "12px", padding: "12px 14px", marginBottom: "14px" }}>
+                <CheckCircle size={20} style={{ color: "#059669", flexShrink: 0 }} />
+                <p style={{ fontSize: "13.5px", fontWeight: 700, color: "#065f46", margin: 0 }}>
+                  Kursi sudah dikunci untukmu. Selesaikan pembayaran di panel sebelah →
+                </p>
               </div>
-              <h4 style={{ color: "var(--text-dark)", marginBottom: "8px" }}>Pendaftaran Tersimpan</h4>
-              <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "20px" }}>
-                Kode Registrasi Anda adalah:
-              </p>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-primary)", letterSpacing: "1px", background: "rgba(29, 78, 216, 0.08)", padding: "12px", borderRadius: "10px", border: "1px dashed var(--color-primary)", marginBottom: "12px" }}>
-                {regData.registration_code}
+              <div style={{ background: "rgba(29, 78, 216, 0.06)", border: "1px dashed var(--color-primary)", borderRadius: "10px", padding: "10px 12px", marginBottom: "10px" }}>
+                <p style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.5px", color: "var(--text-muted)", margin: "0 0 4px 0" }}>KODE REGISTRASI</p>
+                <p style={{ fontSize: "17px", fontWeight: 800, color: "var(--color-primary)", margin: 0, letterSpacing: "0.5px" }}>{regData.registration_code}</p>
+                {seatLabels && (
+                  <p style={{ fontSize: "13px", margin: "6px 0 0 0" }}>
+                    💺 Kursi: <b style={{ color: "#0369a1" }}>{seatLabels}</b> <span style={{ color: "var(--text-muted)" }}>(dikunci selama verifikasi)</span>
+                  </p>
+                )}
               </div>
-              {seatLabels && (
-                <div style={{ background: "#e0f2fe", border: "1.5px solid #38bdf8", borderRadius: "10px", padding: "10px", marginBottom: "20px", fontWeight: 800, color: "#0369a1", fontSize: "15px" }}>
-                  💺 Kursi kamu: {seatLabels} <span style={{ fontWeight: 600, fontSize: "12px", color: "#0369a1" }}>(dikunci saat menunggu verifikasi pembayaran)</span>
-                </div>
-              )}
-              <button className="btn btn-secondary" style={{ width: "100%" }} onClick={handleCheckTicket}>
+              <button className="btn btn-secondary" style={{ width: "100%", fontSize: "13px", padding: "9px" }} onClick={handleCheckTicket}>
                 Lihat Detail Status Tiket
               </button>
             </div>
@@ -449,7 +452,7 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
 
         {/* ===== HALAMAN TERIMA KASIH (muncul setelah SUBMIT) ===== */}
         {regData && submitted && (
-          <div className="glass-card" style={{ background: "rgba(255,255,255,0.95)", gridColumn: "1 / -1", textAlign: "center", padding: "40px 28px" }}>
+          <div id="thanks-section" className="glass-card" style={{ background: "rgba(255,255,255,0.95)", gridColumn: "1 / -1", textAlign: "center", padding: "40px 28px", border: "2px solid #34d399" }}>
             <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: "#d1fae5", color: "#059669", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
               <CheckCircle size={38} />
             </div>

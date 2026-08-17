@@ -34,6 +34,14 @@ function seatPos(col, row) {
   return { x, y };
 }
 
+// Mode FLAT (fullscreen HP): denah 2D — baris sangat renggang (tiap baris = 13.3% zona,
+// tinggi kursi ~2.8% zona) sehingga TIDAK ADA baris yang menutup baris lain. Akurat utk jari.
+function seatPosFlat(col, row) {
+  const x = col < 7 ? 6 + col * 5.0 : 59 + (col - 7) * 5.0;
+  const y = 8 + row * 13.4;
+  return { x, y };
+}
+
 // Gabungkan kursi eksplisit (paid/booked index) + legacy (isi otomatis dari index terendah yang kosong)
 export function buildStates(map) {
   const st = Array(100).fill("free");
@@ -50,7 +58,7 @@ export function buildStates(map) {
   return st;
 }
 
-export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected = [], onSeatClick, wrapClass = "" }) {
+export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected = [], onSeatClick, wrapClass = "", flat = false }) {
   const zoneState = (cat) => {
     const st = categoryFreeCount(cat, seatsMaps[cat]);
     return st;
@@ -86,7 +94,7 @@ export default function SeatMap3D({ seatsMaps = {}, selectMode = null, selected 
               for (let row = 0; row < ROWS; row++) {
                 for (let col = 0; col < PER_ROW; col++) {
                   const idx = row * PER_ROW + col;
-                  const { x, y } = seatPos(col, row);
+                  const { x, y } = flat ? seatPosFlat(col, row) : seatPos(col, row);
                   const isSelected = active && selected.includes(idx);
                   let state = states[idx];
                   if (isSelected) state = "selected";
