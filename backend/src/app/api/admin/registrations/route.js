@@ -43,3 +43,35 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// DELETE /api/admin/registrations?id=XX — hapus permanen registrasi yang DITOLAK
+// (hanya rejected; pending/paid tidak boleh dihapus dari sini agar data transaksi aman)
+export async function DELETE(request) {
+  try {
+    const authError = requireAdmin(request, NextResponse);
+    if (authError) return authError;
+
+    const { searchParams } = new URL(request.url);
+    const id = parseInt(searchParams.get("id"), 10);
+    if (!id || Number.isNaN(id)) {
+      return NextResponse.json({ error: "ID registrasi tidak valid!" }, { status: 400 });
+    }
+
+    const rows = await query("SELECT id, status, registration_code FROM registrations WHERE id = ?", [id]);
+    if (!rows || rows.length === 0) {
+      return NextResponse.json({ error: "Registrasi tidak ditemukan!" }, { status: 404 });
+    }
+    if (rows[0].status !== "rejected") {
+      return NextResponse.json({ error: "Hanya pendaftaran berstatus DITOLAK yang bisa dihapus." }, { status: 400 });
+    }
+
+    await query("DELETE FROM registrations WHERE id = ?", [id]);
+
+    return NextResponse.json({
+      success: true,
+      message: `Registrasi ${rows[0].registration_code} (ditolak) telah dihapus permanen.`
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

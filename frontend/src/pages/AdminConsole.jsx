@@ -327,6 +327,27 @@ export default function AdminConsole() {
     }
   };
 
+  // Hapus permanen pendaftaran yang DITOLAK (biar data tidak menumpuk)
+  const handleDeleteRejected = async (reg) => {
+    if (reg.status !== "rejected") return;
+    if (!window.confirm(`Hapus permanen pendaftaran DITOLAK ini?
+
+${reg.registration_code} — ${reg.name}
+Data tidak bisa dikembalikan.`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/registrations?id=${reg.id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menghapus data.");
+      alert(data.message);
+      fetchDashboardData();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handlePkgEditSelect = (pkg) => {
     setEditingPkg(pkg);
     setPkgEditName(pkg.name);
@@ -1017,6 +1038,16 @@ export default function AdminConsole() {
                               onClick={() => handleVerify(reg.id, "rejected")}
                             >
                               <X size={14} /> Tolak
+                            </button>
+                          )}
+                          {reg.status === "rejected" && (
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ padding: "6px 12px", borderRadius: "6px", fontSize: "12px" }}
+                              title="Hapus permanen data pendaftaran yang ditolak"
+                              onClick={() => handleDeleteRejected(reg)}
+                            >
+                              <Trash2 size={14} /> Hapus
                             </button>
                           )}
                         </div>

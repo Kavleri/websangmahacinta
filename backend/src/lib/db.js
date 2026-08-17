@@ -165,43 +165,73 @@ function writeFallbackDb(data) {
 }
 
 // Try connection pool setup (SSL required for Supabase)
+// CATATAN SERVERLESS (Vercel): container bisa dibekukan/diangkat kapan saja.
+// Pool lama bisa berisi koneksi TCP mati => query error acak lalu jatuh ke fallback.
+// Solusi: pool kecil + idleTimeout pendek + allowExitOnIdle, dan retry sekali dengan
+// koneksi SEGAR jika query kena error koneksi.
 const isSupabase = connectionString.includes("supabase.co") || connectionString.includes("supabase.com");
 try {
   pool = new pg.Pool({
     connectionString,
-    ssl: isSupabase ? { rejectUnauthorized: false } : false
+    ssl: isSupabase ? { rejectUnauthorized: false } : false,
+    max: 3,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 12_000,
+    allowExitOnIdle: true
   });
+  pool.on("error", (err) => console.warn("[db] idle client error (diabaikan):", err.message));
   console.log("[db] mode:", isSupabase ? "PostgreSQL (Supabase)" : "PostgreSQL (local)");
 } catch (err) {
   console.warn("PostgreSQL pool creation failed. Switching to JSON file fallback database.", err.message);
 }
 
 export async function query(sql, params = []) {
-  try {
-    // Convert SQL '?' to '$1, $2, ...' for pg compatible placeholder queries
-    let index = 1;
-    const pgSql = sql.replace(/\?/g, () => `$${index++}`);
-    
+  // Convert SQL '?' to '$1, $2, ...' for pg compatible placeholder queries
+  let index = 1;
+  const pgSql = sql.replace(/\?/g, () => `$${index++}`);
+  const isWrite = pgSql.trim().toLowerCase().startsWith("insert") || pgSql.trim().toLowerCase().startsWith("update") || pgSql.trim().toLowerCase().startsWith("delete");
+
+  const runOnce = async () => {
     const client = await pool.connect();
     try {
-      const res = await client.query(pgSql, params);
-      
-      // Normalize INSERT and UPDATE output formats to match mysql expected returns
-      if (pgSql.trim().toLowerCase().startsWith("insert")) {
-        return { insertId: res.rows[0]?.id || 1 }; 
+      // INSERT: tambahkan RETURNING id agar insertId asli dari database (pg tidak mengembalikan id sendiri)
+      let execSql = pgSql;
+      if (/^\s*insert/i.test(pgSql) && !/returning/i.test(pgSql)) {
+        execSql = pgSql.replace(/;?\s*$/, " RETURNING id");
       }
-      if (pgSql.trim().toLowerCase().startsWith("update")) {
+      const res = await client.query(execSql, params);
+      if (/^\s*insert/i.test(pgSql)) {
+        return { insertId: res.rows[0]?.id || 1 };
+      }
+      if (pgSql.trim().toLowerCase().startsWith("update") || pgSql.trim().toLowerCase().startsWith("delete")) {
         return { affectedRows: res.rowCount };
       }
       return res.rows;
     } finally {
       client.release();
     }
+  };
+
+  try {
+    return await runOnce();
   } catch (err) {
+    const connErr = /ECONNRESET|EPIPE|ETIMEDOUT|connection terminated|terminating connection|timeout expired|Connection terminated|SSL connection has been closed/i.test(err.message || "");
+    if (connErr) {
+      // Coba sekali lagi dengan koneksi segar — pool serverless sering basi setelah container dibekukan
+      try {
+        console.warn("[db] koneksi basi, retry sekali:", err.message);
+        return await runOnce();
+      } catch (err2) {
+        console.warn("[db] retry gagal, fallback JSON utk query ini:", err2.message);
+        return handleFallbackQuery(sql, params);
+      }
+    }
     console.warn("PostgreSQL Query error, fallback per query ini saja:", err.message);
     return handleFallbackQuery(sql, params);
   }
 }
+
+
 
 // Mock Query parser for simple queries used in our API routes
 function handleFallbackQuery(sql, params) {
