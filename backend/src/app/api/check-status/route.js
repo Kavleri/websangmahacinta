@@ -47,7 +47,7 @@ export async function GET(request) {
         unique_code: reg.unique_code,
         total_price: reg.total_price,
         status: reg.status,
-        payment_proof: reg.payment_proof,
+        has_proof: !!reg.payment_proof,
         checked_in: reg.checked_in === 1 || reg.checked_in === true || reg.checked_in === "1",
         checked_in_at: reg.checked_in_at,
         created_at: reg.created_at,

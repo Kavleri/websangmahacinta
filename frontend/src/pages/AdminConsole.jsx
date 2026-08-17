@@ -164,31 +164,51 @@ export default function AdminConsole() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Receipt modal state
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedReceipt, setSelectedReceipt] = useState(null); // {loading, data, error}
   const [selectedReceiptName, setSelectedReceiptName] = useState("bukti-transfer.jpg");
+
+  // Ambil SATU bukti transfer on-demand (list tidak lagi membawa base64)
+  const openReceipt = async (reg) => {
+    setSelectedReceipt({ loading: true });
+    setSelectedReceiptName(`bukti_${reg.registration_code}.${proofExt("")}`);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/proof?id=${reg.id}`, { headers: getAuthHeaders() });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal memuat bukti.");
+      setSelectedReceipt({ loading: false, data: data.payment_proof });
+    } catch (err) {
+      setSelectedReceipt({ loading: false, error: err.message });
+    }
+  };
 
   const proofExt = (dataUri) => {
     const m = /data:image\/(jpeg|png|webp)/.exec(dataUri || "");
     return m ? (m[1] === "jpeg" ? "jpg" : m[1]) : "jpg";
   };
 
-  const handleDownloadAllProofs = () => {
-    const withProof = registrations.filter((r) => r.payment_proof);
+  const handleDownloadAllProofs = async () => {
+    const withProof = registrations.filter((r) => r.has_proof);
     if (withProof.length === 0) {
       alert("Belum ada pendaftar yang mengunggah bukti transfer.");
       return;
     }
     if (!confirm(`Unduh ${withProof.length} bukti transfer? (Browser akan meminta izin mengunduh beberapa file)`)) return;
-    withProof.forEach((r, i) => {
-      setTimeout(() => {
+    for (const r of withProof) {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/proof?id=${r.id}`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "gagal");
         const a = document.createElement("a");
-        a.href = r.payment_proof;
-        a.download = `bukti_${r.registration_code}.${proofExt(r.payment_proof)}`;
+        a.href = data.payment_proof;
+        a.download = `bukti_${r.registration_code}.${proofExt(data.payment_proof)}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
-      }, i * 400);
-    });
+        await new Promise((res2) => setTimeout(res2, 500));
+      } catch (err) {
+        alert(`Gagal unduh bukti ${r.registration_code}: ${err.message}`);
+      }
+    }
   };
 
   // Package editor states
@@ -1009,9 +1029,9 @@ Data tidak bisa dikembalikan.`)) return;
                         <span className={`status-badge status-${reg.status}`} style={{ fontSize: "11px", padding: "4px 10px" }}>
                           {reg.status === "paid" ? "CONFIRMED ✓" : reg.status === "pending" ? "BOOKING — menunggu verifikasi" : reg.status === "rejected" ? "DITOLAK" : reg.status}
                         </span>
-                        {reg.payment_proof ? (
+                        {reg.has_proof ? (
                           <button 
-                            onClick={() => { setSelectedReceipt(reg.payment_proof); setSelectedReceiptName(`bukti_${reg.registration_code}.${proofExt(reg.payment_proof)}`); }}
+                            onClick={() => openReceipt(reg)}
                             style={{ display: "block", fontSize: "11px", color: "var(--color-primary)", border: "none", background: "none", cursor: "pointer", marginTop: "6px", textDecoration: "underline" }}
                           >
                             Lihat Bukti Transfer
@@ -1532,16 +1552,22 @@ Data tidak bisa dikembalikan.`)) return;
         }} onClick={() => setSelectedReceipt(null)}>
           <div className="glass-card" style={{ background: "white", padding: "16px", maxWidth: "500px", width: "100%", textAlign: "center", position: "relative" }} onClick={(e) => e.stopPropagation()}>
             <h4 style={{ marginBottom: "12px" }}>Bukti Transfer Pembayaran</h4>
-            <div style={{ maxHeight: "70vh", overflowY: "auto", background: "#f8fafc", padding: "10px", borderRadius: "10px" }}>
-              <img 
-                src={selectedReceipt} 
-                alt="Bukti Transfer" 
-                style={{ maxWidth: "100%", height: "auto", borderRadius: "6px" }} 
-              />
+            <div style={{ maxHeight: "70vh", overflowY: "auto", background: "#f8fafc", padding: "10px", borderRadius: "10px", minHeight: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {selectedReceipt?.loading ? (
+                <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>Memuat bukti transfer...</p>
+              ) : selectedReceipt?.error ? (
+                <p style={{ color: "#dc2626", fontSize: "14px" }}>{selectedReceipt.error}</p>
+              ) : (
+                <img 
+                  src={selectedReceipt?.data} 
+                  alt="Bukti Transfer" 
+                  style={{ maxWidth: "100%", height: "auto", borderRadius: "6px" }} 
+                />
+              )}
             </div>
             <div style={{ marginTop: "16px", display: "flex", gap: "10px" }}>
               <a
-                href={selectedReceipt}
+                href={selectedReceipt?.data || "#"}
                 download={selectedReceiptName}
                 className="btn btn-primary"
                 style={{ flex: 1, textAlign: "center", textDecoration: "none" }}
