@@ -1018,17 +1018,18 @@ footer strong {
   letter-spacing: 0.3px;
 }
 
-/* --- 4 tiang struktural (di tepi dalam karpet) --- */
+/* --- 4 tiang struktural (DI TENGAH aula, mengapit lorong, di batas antar zona) --- */
 .seat3d-pillar {
   position: absolute;
   width: 20px;
-  height: 36%;
+  height: 34%;
   transform-origin: 50% 100%;
   transform: rotateX(calc(var(--tilt) * -1));
   border-radius: 5px 5px 2px 2px;
   background: linear-gradient(90deg, #64748b 0%, #f1f5f9 45%, #94a3b8 70%, #475569 100%);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.45);
   z-index: 3;
+  pointer-events: none; /* dekoratif — tidak boleh menghalangi klik kursi */
 }
 .seat3d-pillar::after {
   content: "";
@@ -1040,10 +1041,12 @@ footer strong {
   border-radius: 3px;
   background: linear-gradient(90deg, #475569, #e2e8f0 45%, #475569);
 }
-.pl1 { left: 0.3%; top: 16%; }
-.pr1 { right: 0.3%; top: 16%; }
-.pl2 { left: 0.3%; top: 70%; }
-.pr2 { right: 0.3%; top: 70%; }
+/* Lorong tengah: left 39% - 61%. Tiang mengapit lorong di batas zona
+   (premium|reguler ~ top 36%, reguler|economy ~ top 64.5%) */
+.pl1 { left: 34.5%; top: 36%; }
+.pr1 { left: 61.8%; top: 36%; }
+.pl2 { left: 34.5%; top: 64.5%; }
+.pr2 { left: 61.8%; top: 64.5%; }
 
 /* --- pintu masuk utama (berdiri di sisi dekat pengunjung) --- */
 .seat3d-entrance {
