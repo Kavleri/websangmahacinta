@@ -71,7 +71,7 @@ export async function POST(request) {
         const seats = body.seat_numbers.map((n) => parseInt(n, 10));
         const seatLabel = (n) => `${selectedPackage.category.charAt(0).toUpperCase()}-${n + 1}`;
         const valid = seats.length === seatsNeededSel &&
-          seats.every((n) => Number.isInteger(n) && n >= 0 && n <= 99) &&
+          seats.every((n) => Number.isInteger(n) && n >= 0 && n <= 104) &&
           new Set(seats).size === seats.length;
         if (!valid) {
           return NextResponse.json({

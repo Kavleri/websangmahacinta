@@ -170,7 +170,8 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
     const adminNumber = "6285762219848"; // 085762219848 formatted for international link
 
     // Construct pre-filled message text
-    const message = `Halo Admin PeraQ/Duta Qur'an,\n\nSaya sudah melakukan transfer pembayaran registrasi untuk program kami.\n\nDetail Pendaftaran:\n- Nama: ${regData.name}\n- Kode Registrasi: ${regData.registration_code}\n- Program/Paket: ${regData.packageName}${regData.seat_numbers && regData.seat_numbers.length ? `\n- Kursi: ${regData.seat_numbers.map((n) => `${(regData.category || selectedSeat?.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")}` : ""}\n- Total Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nSaya lampirkan bukti pembayaran saya di halaman website. Mohon bantuannya untuk melakukan verifikasi tiket. Terima kasih!`;
+    const message = `Halo Admin PeraQ/Duta Qur'an,\n\nSaya sudah melakukan transfer pembayaran registrasi untuk program kami.\n\nDetail Pendaftaran:\n- Nama: ${regData.name}\n- Kode Registrasi: ${regData.registration_code}\n- Program/Paket: ${regData.packageName}${(() => { const sa = Array.isArray(regData.seat_numbers) ? regData.seat_numbers : (() => { try { const a = JSON.parse(regData.seat_numbers); return Array.isArray(a) ? a : null; } catch (e) { return null; } })(); return sa && sa.length ? `
+- Kursi: ${sa.map((n) => `${(regData.category || selectedSeat?.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")}` : ""; })()}- Total Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nSaya lampirkan bukti pembayaran saya di halaman website. Mohon bantuannya untuk melakukan verifikasi tiket. Terima kasih!`;
 
     return `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`;
   };

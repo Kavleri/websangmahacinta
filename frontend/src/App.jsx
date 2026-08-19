@@ -5,6 +5,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import StatusPage from "./pages/StatusPage";
 import AdminConsole from "./pages/AdminConsole";
 import StaffScanGate from "./pages/StaffScanGate";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   const [page, setPage] = useState("landing"); // landing, checkout, status, admin, staff
@@ -43,6 +44,7 @@ function App() {
       {page !== "staff" && <Navbar currentPage={page} setPage={handleSetPage} />}
 
       <main style={{ flex: 1 }}>
+        <ErrorBoundary>
         {page === "landing" && (
           <LandingPage 
             onSelectPackage={handleSelectPackage} 
@@ -72,6 +74,7 @@ function App() {
         {page === "staff" && (
           <StaffScanGate />
         )}
+        </ErrorBoundary>
       </main>
 
       <footer>
