@@ -156,7 +156,10 @@ export default function LandingPage({ onSelectPackage, setPage }) {
       const col = idx % 15; // kolom 0-6 blok kiri, 7-14 blok kanan (6 & 14 = ujung blok, seberang lorong)
       pick = col === 6 || col === 14 ? [idx - 1, idx] : [idx, idx + 1];
     }
-    const bad = pick.filter((n) => n < 0 || n > 99 || states[n] !== "free");
+    // Seat 100-104 adalah slot tambahan dari layout 15x7 (105 posisi).
+    // Kursi yang memanggil handler sudah pasti class pickable; toleransi undefined
+    // menjaga slot layout baru tidak salah dianggap unavailable oleh cache data lama.
+    const bad = pick.filter((n) => n < 0 || n > 104 || (states[n] !== "free" && states[n] !== undefined));
     if (bad.length > 0) {
       setSeatSel([]);
       setSeatError(`Kursi ${bad.map((n) => seatLabel(cat, n)).join(" & ")} tidak tersedia (sudah diambil / booking). Pilih kursi kosong (putih).`);

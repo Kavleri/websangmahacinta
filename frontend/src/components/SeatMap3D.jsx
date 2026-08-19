@@ -44,13 +44,13 @@ function seatPosFlat(col, row) {
 
 // Gabungkan kursi eksplisit (paid/booked index) + legacy (isi otomatis dari index terendah yang kosong)
 export function buildStates(map) {
-  const st = Array(100).fill("free");
+  const st = Array(105).fill("free");
   const m = map || {};
-  (m.paid || []).forEach((n) => { if (n >= 0 && n < 100) st[n] = "paid"; });
-  (m.booked || []).forEach((n) => { if (n >= 0 && n < 100 && st[n] === "free") st[n] = "booked"; });
+  (m.paid || []).forEach((n) => { if (n >= 0 && n < 105) st[n] = "paid"; });
+  (m.booked || []).forEach((n) => { if (n >= 0 && n < 105 && st[n] === "free") st[n] = "booked"; });
   let legacyPaid = m.legacyPaid || 0;
   let legacyBooked = m.legacyBooked || 0;
-  for (let i = 0; i < 100 && (legacyPaid > 0 || legacyBooked > 0); i++) {
+  for (let i = 0; i < 105 && (legacyPaid > 0 || legacyBooked > 0); i++) {
     if (st[i] !== "free") continue;
     if (legacyPaid > 0) { st[i] = "paid"; legacyPaid--; }
     else { st[i] = "booked"; legacyBooked--; }
