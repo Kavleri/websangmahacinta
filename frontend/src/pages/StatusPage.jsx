@@ -130,7 +130,8 @@ export default function StatusPage({ defaultQuery }) {
         <div style={{ display: "flex", flexDirection: "column", gap: "40px", alignItems: "center" }}>
           {registrations.map((reg) => {
             const isApproved = reg.status === "paid";
-            const hasUploadedProof = !!reg.payment_proof;
+            // check-status sengaja tidak mengirim base64 bukti; gunakan flag ringkas ini
+            const hasUploadedProof = reg.has_proof === true || reg.has_proof === 1 || reg.has_proof === "1" || !!reg.payment_proof;
 
             return (
               <div key={reg.id} style={{
