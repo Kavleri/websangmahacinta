@@ -127,14 +127,14 @@ export default function StatusPage({ defaultQuery }) {
 
       {/* Query Results Display */}
       {registrations.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "40px", alignItems: "center" }}>
+        <div className="status-results" style={{ display: "flex", flexDirection: "column", gap: "40px", alignItems: "center" }}>
           {registrations.map((reg) => {
             const isApproved = reg.status === "paid";
             // check-status sengaja tidak mengirim base64 bukti; gunakan flag ringkas ini
             const hasUploadedProof = reg.has_proof === true || reg.has_proof === 1 || reg.has_proof === "1" || !!reg.payment_proof;
 
             return (
-              <div key={reg.id} style={{
+              <div key={reg.id} className="status-result" style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
                 gap: "32px",
@@ -144,18 +144,18 @@ export default function StatusPage({ defaultQuery }) {
               }}>
                 
                 {/* Details Sheet */}
-                <div className="glass-card" style={{ background: "rgba(255, 255, 255, 0.85)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div className="glass-card status-details-card" style={{ background: "rgba(255, 255, 255, 0.85)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                    <div className="status-result-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                       <span className={`status-badge status-${reg.status}`}>
                         {reg.status === "paid" ? "Pembayaran Sukses" : reg.status === "rejected" ? "Bukti Ditolak" : "Menunggu Verifikasi"}
                       </span>
-                      <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-muted)" }}>{reg.registration_code}</span>
+                      <span className="status-registration-code" style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-muted)" }}>{reg.registration_code}</span>
                     </div>
 
-                    <h3 style={{ color: "var(--color-primary)", marginBottom: "16px" }}>{reg.package_name}</h3>
+                    <h3 className="status-package-name" style={{ color: "var(--color-primary)", marginBottom: "16px" }}>{reg.package_name}</h3>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px", color: "var(--text-dark)", borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "16px", marginBottom: "20px" }}>
+                    <div className="status-info-list" style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px", color: "var(--text-dark)", borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "16px", marginBottom: "20px" }}>
                       <div><strong>Nama:</strong> {reg.name}</div>
                       <div><strong>WhatsApp:</strong> {reg.whatsapp}</div>
                       <div><strong>Email:</strong> {reg.email}</div>
@@ -170,7 +170,7 @@ export default function StatusPage({ defaultQuery }) {
 
                   {/* Payment proof actions inside status check */}
                   {!isApproved && (
-                    <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "16px" }}>
+                    <div className="status-proof-actions" style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "16px" }}>
                       {hasUploadedProof ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "var(--text-muted)", background: "rgba(0,0,0,0.02)", padding: "10px", borderRadius: "8px" }}>
                           <FileText size={16} /> Bukti transfer telah terunggah. Silakan tunggu verifikasi admin WhatsApp.
@@ -197,10 +197,10 @@ export default function StatusPage({ defaultQuery }) {
                 </div>
 
                 {/* E-Ticket Display (If Paid) or Status Panel (If Pending/Rejected) */}
-                <div style={{ display: "flex" }}>
+                <div className="status-ticket-column" style={{ display: "flex" }}>
                   {isApproved ? (
                     /* Beautiful Premium E-Ticket layout */
-                    <div className="glass-card" style={{
+                    <div className="glass-card status-eticket" style={{
                       background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
                       color: "white",
                       display: "flex",
@@ -223,7 +223,7 @@ export default function StatusPage({ defaultQuery }) {
                         <div className="sparkle" style={{ top: "80%", left: "10%", width: "5px", height: "5px", animationDelay: "3s" }}></div>
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
+                      <div className="status-ticket-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
                         <div>
                           <p style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "1px", color: "var(--color-accent)", textTransform: "uppercase" }}>E-TIKET MASUK</p>
                           <h3 style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "20px", color: "white", marginTop: "4px" }}>Duta Qur'an Indonesia</h3>
@@ -231,9 +231,9 @@ export default function StatusPage({ defaultQuery }) {
                         <Compass className="animate-spin-slow" size={24} style={{ color: "var(--color-accent)" }} />
                       </div>
 
-                      <div style={{ display: "flex", gap: "24px", margin: "24px 0", alignItems: "center", position: "relative", zIndex: 1, flexWrap: "wrap" }}>
+                      <div className="status-ticket-body" style={{ display: "flex", gap: "24px", margin: "24px 0", alignItems: "center", position: "relative", zIndex: 1, flexWrap: "wrap" }}>
                         {/* QR Code */}
-                        <div style={{ background: "white", padding: "10px", borderRadius: "12px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", display: "flex", flexShrink: 0 }}>
+                        <div className="status-ticket-qr" style={{ background: "white", padding: "10px", borderRadius: "12px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", display: "flex", flexShrink: 0 }}>
                           {reg.qr_payload ? (
                             <QRCodeSVG
                               value={reg.qr_payload}
@@ -251,7 +251,7 @@ export default function StatusPage({ defaultQuery }) {
                         </div>
 
                         {/* Event summary details */}
-                        <div style={{ fontSize: "13px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                        <div className="status-ticket-summary" style={{ fontSize: "13px", display: "flex", flexDirection: "column", gap: "6px" }}>
                           <p style={{ fontWeight: 700, fontSize: "16px", color: "white" }}>{reg.name}</p>
                           <p style={{ opacity: 0.8 }}>{reg.package_name}</p>
                           {(() => {
@@ -281,7 +281,7 @@ export default function StatusPage({ defaultQuery }) {
                       </div>
 
                       {/* Check-in Ticket status badge */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255,255,255,0.2)", paddingTop: "16px", position: "relative", zIndex: 1 }}>
+                      <div className="status-ticket-footer" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed rgba(255,255,255,0.2)", paddingTop: "16px", position: "relative", zIndex: 1 }}>
                         <span style={{ fontSize: "11px", opacity: 0.7 }}>Tunjukkan QR Code ini pada panitia saat masuk</span>
                         <span style={{
                           fontSize: "12px",
@@ -301,7 +301,7 @@ export default function StatusPage({ defaultQuery }) {
                     </div>
                   ) : (
                     /* Instructions card if still pending */
-                    <div className="glass-card" style={{
+                    <div className="glass-card status-pending-panel" style={{
                       background: "rgba(255,255,255,0.6)",
                       display: "flex",
                       flexDirection: "column",

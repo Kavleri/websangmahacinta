@@ -1280,3 +1280,194 @@ section[id] { scroll-margin-top: 92px; }
   background: #0b1526;
   border-top: 1px solid rgba(212, 175, 55, 0.25);
 }
+
+/* Mobile ticket lookup: stack cards cleanly and keep every control tappable. */
+.status-results {
+  width: 100%;
+}
+.status-result {
+  width: 100%;
+}
+.status-ticket-column {
+  min-width: 0;
+}
+.status-ticket-qr svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .status-results {
+    gap: 22px !important;
+    align-items: stretch !important;
+  }
+
+  .status-result {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .status-details-card,
+  .status-pending-panel,
+  .status-eticket {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .status-details-card {
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .status-result-header {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 16px !important;
+  }
+
+  .status-result-header .status-badge {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .status-registration-code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: right;
+    line-height: 1.35;
+  }
+
+  .status-package-name {
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+    overflow-wrap: anywhere;
+    margin-bottom: 14px !important;
+  }
+
+  .status-info-list {
+    gap: 10px !important;
+    font-size: 13.5px !important;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    padding-top: 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .status-proof-actions {
+    padding-top: 14px !important;
+  }
+
+  .status-proof-actions > div:last-child,
+  .status-proof-actions form,
+  .status-proof-actions input,
+  .status-proof-actions button {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .status-proof-actions input[type="file"] {
+    min-height: 42px;
+    font-size: 12px !important;
+  }
+
+  .status-proof-actions button {
+    min-height: 44px;
+  }
+
+  .status-ticket-column {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .status-eticket {
+    padding: 20px !important;
+    border-radius: 18px !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .status-ticket-header {
+    gap: 10px !important;
+  }
+
+  .status-ticket-header h3 {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+  }
+
+  .status-ticket-body {
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin: 20px 0 !important;
+    align-items: stretch !important;
+  }
+
+  .status-ticket-qr {
+    width: 150px !important;
+    height: 150px !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    align-self: center !important;
+    justify-content: center !important;
+  }
+
+  .status-ticket-qr svg {
+    width: 130px !important;
+    height: 130px !important;
+  }
+
+  .status-ticket-summary {
+    width: 100% !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 7px !important;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .status-ticket-summary p {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .status-ticket-summary span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .status-ticket-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding-top: 14px !important;
+  }
+
+  .status-ticket-footer > span:first-child {
+    font-size: 11.5px !important;
+    line-height: 1.45;
+  }
+
+  .status-ticket-footer > span:last-child {
+    align-self: stretch;
+    text-align: center;
+  }
+
+  .status-pending-panel {
+    padding: 22px 18px !important;
+    min-height: 220px !important;
+    border-radius: 18px !important;
+  }
+
+  .status-pending-panel h4 {
+    line-height: 1.35;
+  }
+}
+
