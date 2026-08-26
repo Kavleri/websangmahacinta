@@ -369,14 +369,6 @@ Data tidak bisa dikembalikan.`)) return;
     }
   };
 
-  // Kirim link E-Tiket langsung ke WhatsApp peserta setelah status CONFIRMED.
-  const getTicketWhatsAppLink = (reg) => {
-    if (!reg || reg.status !== "paid" || !reg.whatsapp || !reg.ticket_url) return "#";
-    const message = `Halo ${reg.name},\n\nPembayaran tiket Anda sudah dikonfirmasi oleh admin Duta Qur'an.\n\nPaket: ${reg.package_name}\nKode Registrasi: ${reg.registration_code}\n\nBuka E-Tiket dan QR Code Anda di sini:\n${reg.ticket_url}\n\nTunjukkan QR Code tersebut kepada panitia saat check-in. Terima kasih.`;
-    const number = String(reg.whatsapp).replace(/[^0-9]/g, "").replace(/^0+/, "62");
-    return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
-  };
-
   const handlePkgEditSelect = (pkg) => {
     setEditingPkg(pkg);
     setPkgEditName(pkg.name);
@@ -1047,18 +1039,6 @@ Data tidak bisa dikembalikan.`)) return;
                             </button>
                           ) : (
                             <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "6px" }}>Belum upload bukti</div>
-                          )}
-                          {reg.status === "paid" && (
-                            <a
-                              href={getTicketWhatsAppLink(reg)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="btn btn-whatsapp"
-                              style={{ display: "inline-flex", marginTop: "8px", padding: "6px 9px", fontSize: "11px", textDecoration: "none", borderRadius: "7px" }}
-                              title="Kirim link E-Tiket dan QR ke WhatsApp peserta"
-                            >
-                              Kirim E-Tiket via WA
-                            </a>
                           )}
                       </td>
                       <td style={{ padding: "14px 12px", textAlign: "center" }}>

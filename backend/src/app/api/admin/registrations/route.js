@@ -34,7 +34,6 @@ export async function GET(request) {
         total_price: reg.total_price,
         status: reg.status,
         qr_payload: reg.status === "paid" ? createQrPayload(reg.id, reg.registration_code) : null,
-        ticket_url: reg.status === "paid" ? `https://sangmahacinta.com/?ticket=${encodeURIComponent(reg.registration_code)}` : null,
         checked_in: reg.checked_in === 1 || reg.checked_in === true || reg.checked_in === "1" || reg.checked_in === 1,
         checked_in_at: reg.checked_in_at,
         created_at: reg.created_at
