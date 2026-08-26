@@ -235,7 +235,7 @@ export default function StatusPage({ defaultQuery }) {
                         {/* QR Code */}
                         <div style={{ background: "white", padding: "10px", borderRadius: "12px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", display: "flex", flexShrink: 0 }}>
                           <QRCodeSVG 
-                            value={reg.registration_code} 
+                            value={reg.qr_payload || reg.registration_code} 
                             size={100}
                             bgColor={"#ffffff"}
                             fgColor={"#0f172a"}

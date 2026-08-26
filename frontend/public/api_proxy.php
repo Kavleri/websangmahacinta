@@ -19,14 +19,23 @@ if (empty($path)) {
     }
 }
 
+// Teruskan query string selain parameter internal "path" (mis. id=47 atau query=REG-...)
+$queryParams = $_GET;
+unset($queryParams['path']);
+$queryString = http_build_query($queryParams);
 $targetUrl = "https://backend-ten-umber-9dbevyts90.vercel.app/api/" . $path;
+if ($queryString !== '') {
+    $targetUrl .= '?' . $queryString;
+}
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $targetUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array("Expect:"));
 
 $method = $_SERVER['REQUEST_METHOD'];
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
