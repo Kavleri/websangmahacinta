@@ -19,7 +19,7 @@ export default function StatusPage({ defaultQuery }) {
     setSearching(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE}/api/check-status?query=${encodeURIComponent(val)}`);
+      const response = await fetch(`${VERCEL_BASE}/api/check-status?query=${encodeURIComponent(val)}`);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Gagal memuat status pendaftaran.");

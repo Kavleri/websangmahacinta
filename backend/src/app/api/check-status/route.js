@@ -5,6 +5,16 @@ import crypto from "crypto";
 const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
 const QR_SECRET_SALT = getEnv("QR_SECRET_SALT", "dutaqu_secret_salt_2026");
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 // GET /api/check-status?query=value
 export async function GET(request) {
   try {
@@ -12,7 +22,7 @@ export async function GET(request) {
     const searchVal = searchParams.get("query");
 
     if (!searchVal) {
-      return NextResponse.json({ error: "Silakan masukkan nomor WhatsApp atau Kode Registrasi!" }, { status: 400 });
+      return NextResponse.json({ error: "Silakan masukkan nomor WhatsApp atau Kode Registrasi!" }, { status: 400, headers: CORS });
     }
 
     // 1. Fetch matching registrations
@@ -22,7 +32,7 @@ export async function GET(request) {
     );
 
     if (!registrations || registrations.length === 0) {
-      return NextResponse.json([]);
+      return NextResponse.json([], { headers: CORS });
     }
 
     // 2. Fetch packages to map names
@@ -57,9 +67,9 @@ export async function GET(request) {
       };
     });
 
-    return NextResponse.json(mappedResults);
+    return NextResponse.json(mappedResults, { headers: CORS });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: CORS });
   }
 }
 
