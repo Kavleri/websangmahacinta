@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Search, Compass, ShieldAlert, CheckCircle, Upload, FileText, Calendar, Clock } from "lucide-react";
-import { API_BASE } from "../apiConfig";
+import { API_BASE, VERCEL_BASE } from "../apiConfig";
 
 export default function StatusPage({ defaultQuery }) {
   const [queryVal, setQueryVal] = useState(defaultQuery || "");
@@ -43,7 +43,16 @@ export default function StatusPage({ defaultQuery }) {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchStatus(queryVal);
+    // Browser mobile/Chrome bisa mengisi input lewat autofill tanpa memicu React state.
+    // Baca nilai aktual form sebagai sumber kebenaran saat tombol Cari ditekan.
+    const formValue = e.currentTarget.elements.namedItem("ticket-query")?.value || "";
+    const value = formValue.trim() || queryVal.trim();
+    if (!value) {
+      setError("Silakan masukkan nomor WhatsApp atau Kode Registrasi!");
+      return;
+    }
+    setQueryVal(value);
+    fetchStatus(value);
   };
 
   const handleFileChange = (e) => {
@@ -61,7 +70,7 @@ export default function StatusPage({ defaultQuery }) {
     formData.append("registration_code", regCode);
 
     try {
-      const response = await fetch(`${API_BASE}/api/upload-proof`, {
+      const response = await fetch(`${VERCEL_BASE}/api/upload-proof`, {
         method: "POST",
         body: formData,
       });
@@ -96,6 +105,8 @@ export default function StatusPage({ defaultQuery }) {
               type="text" 
               className="form-control" 
               placeholder="Contoh: 081234567890 ATAU REG-20260711-XXXX"
+              name="ticket-query"
+              autoComplete="off"
               value={queryVal}
               onChange={(e) => setQueryVal(e.target.value)}
               required 
