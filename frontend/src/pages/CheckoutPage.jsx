@@ -167,12 +167,22 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
 
   const getWhatsAppLink = () => {
     if (!regData) return "";
-    const adminNumber = "6285762219848"; // 085762219848 formatted for international link
-
-    // Construct pre-filled message text
-    const message = `Halo Admin PeraQ/Duta Qur'an,\n\nSaya sudah melakukan transfer pembayaran registrasi untuk program kami.\n\nDetail Pendaftaran:\n- Nama: ${regData.name}\n- Kode Registrasi: ${regData.registration_code}\n- Program/Paket: ${regData.packageName}${(() => { const sa = Array.isArray(regData.seat_numbers) ? regData.seat_numbers : (() => { try { const a = JSON.parse(regData.seat_numbers); return Array.isArray(a) ? a : null; } catch (e) { return null; } })(); return sa && sa.length ? `
-- Kursi: ${sa.map((n) => `${(regData.category || selectedSeat?.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")}` : ""; })()}- Total Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nSaya lampirkan bukti pembayaran saya di halaman website. Mohon bantuannya untuk melakukan verifikasi tiket. Terima kasih!`;
-
+    const adminNumber = "6285762219848";
+    const ticketUrl = `https://sangmahacinta.com/?ticket=${encodeURIComponent(regData.registration_code)}`;
+    const seatArray = Array.isArray(regData.seat_numbers)
+      ? regData.seat_numbers
+      : (() => {
+          try {
+            const parsed = JSON.parse(regData.seat_numbers);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            return [];
+          }
+        })();
+    const seatText = seatArray.length
+      ? `\nKursi: ${seatArray.map((n) => `${(regData.category || selectedSeat?.cat || "x").charAt(0).toUpperCase()}-${n + 1}`).join(" + ")}`
+      : "";
+    const message = `Halo Admin Duta Qur'an,\n\nSaya telah menyelesaikan pembayaran pendaftaran seminar dan mengunggah bukti transfer untuk diverifikasi.\n\nDATA PEMESANAN\nNama: ${regData.name}\nKode Registrasi: ${regData.registration_code}\nPaket: ${regData.packageName}${seatText}\nTotal Transfer: Rp ${parseFloat(regData.total_price).toLocaleString("id-ID")}\n\nBUKTI & E-TIKET\nBukti transfer sudah tersimpan di sistem untuk pemeriksaan admin.\nLink cek status dan E-Tiket: ${ticketUrl}\n\nMohon admin memeriksa keabsahan bukti transfer terlebih dahulu. QR E-Tiket hanya diterbitkan setelah pembayaran disetujui (status Confirmed). Terima kasih.`;
     return `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`;
   };
 
