@@ -411,7 +411,7 @@ export default function CheckoutPage({ selectedPackage, selectedSeat, setPage, s
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px", fontSize: "14px" }}>
               <div style={{ background: "white", padding: "14px", borderRadius: "10px", border: "1px solid rgba(0,0,0,0.05)" }}>
                 <p style={{ fontWeight: 700, color: "var(--text-dark)" }}>Bank Syariah Indonesia (BSI)</p>
-                <p style={{ fontSize: "18px", fontWeight: 800, color: "var(--color-primary)", margin: "4px 0" }}>7172839401</p>
+                <p style={{ fontSize: "18px", fontWeight: 800, color: "var(--color-primary)", margin: "4px 0" }}>1412210014</p>
                 <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>a.n. Duta Quran Indonesia</p>
               </div>
             </div>
