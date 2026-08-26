@@ -341,7 +341,7 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 boxShadow: "0 10px 26px rgba(12, 36, 80, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.3)",
                 background: "white"
               }}>
-                <img src="/speakers/abi-heru.jpg" alt="Abi Heru Arrasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src="/speakers/abi-heru.jpg?v=20260826" alt="Abi Heru Arrasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Abi Heru Arrasyid</h3>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Ketua Yayasan Pesantren Tahfidz Arrasyid</p>
@@ -362,7 +362,7 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                 boxShadow: "0 10px 26px rgba(12, 36, 80, 0.22), 0 0 0 1px rgba(37, 99, 235, 0.3)",
                 background: "white"
               }}>
-                <img src="/speakers/ummi-rasyid.jpg" alt="Ummi Rasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src="/speakers/ummi-rasyid.jpg?v=20260826" alt="Ummi Rasyid" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <h3 style={{ fontSize: "20px", color: "var(--color-primary)", marginBottom: "6px" }}>Ummi Rasyid</h3>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--color-accent)", textTransform: "uppercase", marginBottom: "12px" }}>Survivor Cancer • Founder Duta Quran Indonesia</p>
