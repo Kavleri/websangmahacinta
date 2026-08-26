@@ -2,6 +2,7 @@ import { API_BASE } from "../apiConfig";
 import React, { useState, useEffect } from "react";
 import { LogIn, Users, CreditCard, Check, X, ShieldAlert, Camera, PlusCircle, RefreshCw, Trash2, Tag, Key, UserCheck, BarChart3, Clock, DollarSign, UserX } from "lucide-react";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function AdminConsole() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -366,6 +367,14 @@ Data tidak bisa dikembalikan.`)) return;
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  // Kirim link E-Tiket langsung ke WhatsApp peserta setelah status CONFIRMED.
+  const getTicketWhatsAppLink = (reg) => {
+    if (!reg || reg.status !== "paid" || !reg.whatsapp || !reg.ticket_url) return "#";
+    const message = `Halo ${reg.name},\n\nPembayaran tiket Anda sudah dikonfirmasi oleh admin Duta Qur'an.\n\nPaket: ${reg.package_name}\nKode Registrasi: ${reg.registration_code}\n\nBuka E-Tiket dan QR Code Anda di sini:\n${reg.ticket_url}\n\nTunjukkan QR Code tersebut kepada panitia saat check-in. Terima kasih.`;
+    const number = String(reg.whatsapp).replace(/[^0-9]/g, "").replace(/^0+/, "62");
+    return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   };
 
   const handlePkgEditSelect = (pkg) => {
@@ -1029,19 +1038,37 @@ Data tidak bisa dikembalikan.`)) return;
                         <span className={`status-badge status-${reg.status}`} style={{ fontSize: "11px", padding: "4px 10px" }}>
                           {reg.status === "paid" ? "CONFIRMED ✓" : reg.status === "pending" ? "BOOKING — menunggu verifikasi" : reg.status === "rejected" ? "DITOLAK" : reg.status}
                         </span>
-                        {reg.has_proof ? (
-                          <button 
-                            onClick={() => openReceipt(reg)}
-                            style={{ display: "block", fontSize: "11px", color: "var(--color-primary)", border: "none", background: "none", cursor: "pointer", marginTop: "6px", textDecoration: "underline" }}
-                          >
-                            Lihat Bukti Transfer
-                          </button>
-                        ) : (
-                          <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "6px" }}>Belum upload bukti</div>
-                        )}
+                          {reg.has_proof ? (
+                            <button
+                              onClick={() => openReceipt(reg)}
+                              style={{ display: "block", fontSize: "11px", color: "var(--color-primary)", border: "none", background: "none", cursor: "pointer", marginTop: "6px", textDecoration: "underline" }}
+                            >
+                              Lihat Bukti Transfer
+                            </button>
+                          ) : (
+                            <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "6px" }}>Belum upload bukti</div>
+                          )}
+                          {reg.status === "paid" && (
+                            <a
+                              href={getTicketWhatsAppLink(reg)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-whatsapp"
+                              style={{ display: "inline-flex", marginTop: "8px", padding: "6px 9px", fontSize: "11px", textDecoration: "none", borderRadius: "7px" }}
+                              title="Kirim link E-Tiket dan QR ke WhatsApp peserta"
+                            >
+                              Kirim E-Tiket via WA
+                            </a>
+                          )}
                       </td>
                       <td style={{ padding: "14px 12px", textAlign: "center" }}>
-                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                        {reg.status === "paid" && reg.qr_payload && (
+                          <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: "5px", marginBottom: "8px", padding: "6px", background: "white", border: "1px solid #bbf7d0", borderRadius: "8px" }} title="QR resmi dari database — gunakan untuk scan check-in">
+                            <QRCodeSVG value={reg.qr_payload} size={62} level="M" includeMargin={false} />
+                            <span style={{ fontSize: "10px", color: "#15803d", fontWeight: 700 }}>QR CONFIRMED</span>
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
                           {reg.status !== "paid" && (
                             <button 
                               className="btn btn-success" 

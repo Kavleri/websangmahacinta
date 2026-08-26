@@ -15,10 +15,15 @@ function App() {
 
   React.useEffect(() => {
     const path = window.location.pathname;
+    const ticket = new URLSearchParams(window.location.search).get("ticket");
     if (path === "/admin-secret-gate-7832419084321") {
       setPage("admin");
     } else if (path === "/staff-scan-gate") {
       setPage("staff");
+    } else if (ticket) {
+      // Link E-Tiket dari admin membuka hasil tiket langsung untuk orang tua.
+      setQueryCode(ticket);
+      setPage("status");
     }
   }, []);
 

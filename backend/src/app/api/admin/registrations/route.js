@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { createQrPayload } from "@/lib/qr";
 
 // GET /api/admin/registrations
 export async function GET(request) {
@@ -32,6 +33,8 @@ export async function GET(request) {
         unique_code: reg.unique_code,
         total_price: reg.total_price,
         status: reg.status,
+        qr_payload: reg.status === "paid" ? createQrPayload(reg.id, reg.registration_code) : null,
+        ticket_url: reg.status === "paid" ? `https://sangmahacinta.com/?ticket=${encodeURIComponent(reg.registration_code)}` : null,
         checked_in: reg.checked_in === 1 || reg.checked_in === true || reg.checked_in === "1" || reg.checked_in === 1,
         checked_in_at: reg.checked_in_at,
         created_at: reg.created_at
