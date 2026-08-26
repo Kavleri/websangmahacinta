@@ -234,14 +234,20 @@ export default function StatusPage({ defaultQuery }) {
                       <div style={{ display: "flex", gap: "24px", margin: "24px 0", alignItems: "center", position: "relative", zIndex: 1, flexWrap: "wrap" }}>
                         {/* QR Code */}
                         <div style={{ background: "white", padding: "10px", borderRadius: "12px", boxShadow: "0 8px 16px rgba(0,0,0,0.15)", display: "flex", flexShrink: 0 }}>
-                          <QRCodeSVG 
-                            value={reg.qr_payload || reg.registration_code} 
-                            size={100}
-                            bgColor={"#ffffff"}
-                            fgColor={"#0f172a"}
-                            level={"M"}
-                            includeMargin={false}
-                          />
+                          {reg.qr_payload ? (
+                            <QRCodeSVG
+                              value={reg.qr_payload}
+                              size={100}
+                              bgColor={"#ffffff"}
+                              fgColor={"#0f172a"}
+                              level={"M"}
+                              includeMargin={false}
+                            />
+                          ) : (
+                            <div style={{ width: "100px", height: "100px", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#64748b", fontSize: "11px", lineHeight: 1.3 }}>
+                              QR diterbitkan setelah pembayaran dikonfirmasi
+                            </div>
+                          )}
                         </div>
 
                         {/* Event summary details */}

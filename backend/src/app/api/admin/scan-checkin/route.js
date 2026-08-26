@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { requireAdminOrStaff } from "@/lib/auth";
-import crypto from "crypto";
-
-const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
-const QR_SECRET_SALT = getEnv("QR_SECRET_SALT", "dutaqu_secret_salt_2026");
+import { parseQrInput } from "@/lib/qr";
 
 // POST /api/admin/scan-checkin
 export async function POST(request) {
@@ -13,32 +10,30 @@ export async function POST(request) {
     const authError = requireAdminOrStaff(request, NextResponse);
     if (authError) return authError;
     const body = await request.json();
-    const { registration_code } = body;
+    const { registration_code, scan_mode = "manual" } = body;
 
     if (!registration_code) {
       return NextResponse.json({ error: "Kode registrasi tiket tidak ditemukan dalam scan!" }, { status: 400 });
     }
 
-    let finalCode = registration_code.trim();
-
-    // 1. Verify digital signature if present (e.g. format CODE:SIGNATURE)
-    if (finalCode.includes(":")) {
-      const parts = finalCode.split(":");
-      const code = parts[0];
-      const sig = parts[1];
-
-      const expectedSig = crypto.createHmac("sha256", QR_SECRET_SALT).update(code).digest("hex");
-      if (sig !== expectedSig) {
-        return NextResponse.json({
-          success: false,
-          error: "Tiket Palsu / Invalid!",
-          message: "Tanda tangan digital QR Code tidak cocok. Tiket ini tidak sah dan kemungkinan hasil manipulasi!"
-        }, { status: 400 });
-      }
-      finalCode = code; // Use the verified code
+    const parsed = parseQrInput(registration_code);
+    if (scan_mode === "qr" && (!parsed.valid || !parsed.signed)) {
+      return NextResponse.json({
+        success: false,
+        error: "QR Code Tidak Valid!",
+        message: "Scanner hanya menerima QR E-Tiket resmi yang diterbitkan setelah pembayaran disetujui."
+      }, { status: 400 });
     }
+    if (!parsed.valid) {
+      return NextResponse.json({
+        success: false,
+        error: "Tiket Palsu / Invalid!",
+        message: "QR Code tidak valid atau telah dimanipulasi. Minta peserta membuka E-Tiket terbaru dari halaman Cek Tiket."
+      }, { status: 400 });
+    }
+    const finalCode = parsed.code;
 
-    // 2. Fetch registration
+    // Fetch registration berdasarkan kode dari QR/input manual
     const registrations = await query(
       "SELECT * FROM registrations WHERE registration_code = ?",
       [finalCode]
@@ -54,7 +49,17 @@ export async function POST(request) {
 
     const reg = registrations[0];
 
-    // 3. Check if payment is paid
+    // QR versi baru mengikat ID database + kode registrasi.
+    // Jika salah satu tidak cocok, QR dianggap hasil manipulasi.
+    if (parsed.signed && parsed.version === 1 && parsed.id !== reg.id) {
+      return NextResponse.json({
+        success: false,
+        error: "Tiket Palsu / Invalid!",
+        message: "QR Code tidak cocok dengan data registrasi di database."
+      }, { status: 400 });
+    }
+
+    // Check if payment is paid
     if (reg.status !== "paid") {
       return NextResponse.json({
         success: false,

@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import crypto from "crypto";
-
-const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
-const QR_SECRET_SALT = getEnv("QR_SECRET_SALT", "dutaqu_secret_salt_2026");
+import { createQrPayload } from "@/lib/qr";
 
 // POST /api/register
 export async function POST(request) {
@@ -162,8 +159,7 @@ export async function POST(request) {
     const randStr = Math.random().toString(36).substring(2, 6).toUpperCase();
     const regCode = `REG-${dateStr}-${randStr}`;
 
-    // 5. Generate secure digital signature for the QR Code
-    const signature = crypto.createHmac("sha256", QR_SECRET_SALT).update(regCode).digest("hex");
+    // 5. Save to DB
 
     // 6. Save to DB
     // Check if DATABASE_URL connection string supports pg compatible dynamic inserts
@@ -209,7 +205,8 @@ export async function POST(request) {
         voucher_code: validVoucherCode,
         discount_amount: discount,
         seat_numbers: registerSeatNumbers ? JSON.parse(registerSeatNumbers) : null,
-        qr_payload: `${regCode}:${signature}`
+        // QR final dibuat setelah id database diketahui di endpoint status.
+        qr_payload: null
       }
     });
   } catch (error) {

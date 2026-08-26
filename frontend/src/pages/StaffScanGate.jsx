@@ -154,7 +154,7 @@ export default function StaffScanGate() {
           const res = await fetch(`${API_BASE}/api/admin/scan-checkin`, {
             method: "POST",
             headers: getAuthHeaders(),
-            body: JSON.stringify({ registration_code: decodedText })
+            body: JSON.stringify({ registration_code: decodedText, scan_mode: "qr" })
           });
           const data = await res.json();
           setScanResult(data);

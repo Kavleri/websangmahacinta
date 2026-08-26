@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import crypto from "crypto";
-
-const getEnv = (key, fallback) => (process.env && process.env[key]) || fallback;
-const QR_SECRET_SALT = getEnv("QR_SECRET_SALT", "dutaqu_secret_salt_2026");
+import { createQrPayload } from "@/lib/qr";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +37,7 @@ export async function GET(request) {
 
     const mappedResults = registrations.map(reg => {
       const pkg = packages.find(p => p.id === parseInt(reg.package_id, 10));
-      const signature = crypto.createHmac("sha256", QR_SECRET_SALT).update(reg.registration_code).digest("hex");
+      const qrPayload = reg.status === "paid" ? createQrPayload(reg.id, reg.registration_code) : null;
       
       return {
         id: reg.id,
@@ -63,7 +60,7 @@ export async function GET(request) {
         created_at: reg.created_at,
         voucher_code: reg.voucher_code || null,
         discount_amount: reg.discount_amount ? parseFloat(reg.discount_amount) : 0.00,
-        qr_payload: `${reg.registration_code}:${signature}`
+        qr_payload: qrPayload
       };
     });
 
