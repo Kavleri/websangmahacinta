@@ -166,6 +166,7 @@ export default function AdminConsole() {
   // Registration list states
   const [filterStatus, setFilterStatus] = useState("all"); // all, pending, paid, rejected
   const [searchQuery, setSearchQuery] = useState("");
+  const [showConfirmedList, setShowConfirmedList] = useState(false);
 
   // Receipt modal state
   const [selectedReceipt, setSelectedReceipt] = useState(null); // {loading, data, error}
@@ -837,7 +838,14 @@ Data tidak bisa dikembalikan.`)) return;
             <Users size={18} style={{ opacity: 0.7 }} />
           </div>
           <div className="stat-value" style={{ fontSize: "28px", fontWeight: 800, lineHeight: 1 }}>{stats.totalRegistrations}</div>
-          <div style={{ fontSize: "11px", opacity: 0.7, marginTop: "6px" }}>{stats.totalPaid} terkonfirmasi</div>
+          <button
+            type="button"
+            onClick={() => { setShowConfirmedList(true); setActiveTab("registrations"); setFilterStatus("paid"); setSearchQuery(""); }}
+            title="Klik untuk melihat nama peserta yang sudah terkonfirmasi"
+            style={{ display: "inline-flex", marginTop: "8px", padding: "4px 8px", borderRadius: "7px", border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.12)", color: "white", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+          >
+            {stats.totalPaid} terkonfirmasi · lihat nama
+          </button>
         </div>
 
         <div className="admin-stat-card" style={{ background: "linear-gradient(135deg, #059669 0%, #10b981 100%)", borderRadius: "16px", padding: "20px", color: "white" }}>
@@ -867,6 +875,47 @@ Data tidak bisa dikembalikan.`)) return;
           <div style={{ fontSize: "11px", opacity: 0.7, marginTop: "6px" }}>dari {stats.totalPaid} tiket lunas</div>
         </div>
       </div>
+
+      {/* Daftar peserta confirmed yang dibuka dari kartu statistik */}
+      {showConfirmedList && (
+        <div className="glass-card admin-confirmed-list" style={{ background: "rgba(255,255,255,0.95)", borderRadius: "16px", padding: "20px", marginBottom: "32px", border: "1px solid rgba(16,185,129,0.25)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+            <div>
+              <strong style={{ color: "#047857", fontSize: "16px" }}>Peserta Sudah Terkonfirmasi</strong>
+              <p style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "4px" }}>Daftar ini otomatis mengikuti perubahan status pembayaran secara real-time.</p>
+            </div>
+            <button type="button" className="btn btn-secondary" style={{ padding: "7px 12px", fontSize: "12px", borderRadius: "9px" }} onClick={() => setShowConfirmedList(false)}>Tutup Daftar</button>
+          </div>
+          {stats.totalPaid === 0 ? (
+            <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "20px" }}>Belum ada peserta yang pembayarannya dikonfirmasi.</p>
+          ) : (
+            <div className="admin-confirmed-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "10px" }}>
+              {registrations.filter((r) => r.status === "paid").map((reg) => {
+                let seats = [];
+                try {
+                  const parsed = typeof reg.seat_numbers === "string" ? JSON.parse(reg.seat_numbers) : reg.seat_numbers;
+                  if (Array.isArray(parsed)) seats = parsed;
+                } catch (e) { /* data kursi lama tidak menghalangi daftar */ }
+                const initial = (reg.category || "x").charAt(0).toUpperCase();
+                return (
+                  <div key={reg.id} style={{ border: "1px solid rgba(16,185,129,0.2)", borderRadius: "12px", padding: "13px", background: "#f0fdf4" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "flex-start" }}>
+                      <strong style={{ color: "var(--color-primary)", fontSize: "14px" }}>{reg.name}</strong>
+                      <span style={{ color: "#047857", fontWeight: 800, fontSize: "11px", whiteSpace: "nowrap" }}>CONFIRMED ✓</span>
+                    </div>
+                    <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "7px", lineHeight: 1.6 }}>
+                      <div>{reg.package_name}</div>
+                      <div>Kode: <b style={{ color: "var(--color-primary)" }}>{reg.registration_code}</b></div>
+                      <div>Kursi: <b style={{ color: "#0369a1" }}>{seats.length ? seats.map((n) => `${initial}-${n + 1}`).join(" + ") : "belum ditentukan"}</b></div>
+                      <div>Rp {parseFloat(reg.total_price || 0).toLocaleString("id-ID")}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Ringkasan Status Seat per Kategori (kontrol manual via verifikasi pembayaran) */}
       {seatCategories.length > 0 && (
