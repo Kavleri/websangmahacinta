@@ -159,6 +159,9 @@ export default function AdminConsole() {
   const [vouchers, setVouchers] = useState([]);
   const [users, setUsers] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
+  const [syncError, setSyncError] = useState("");
+  const syncInFlight = React.useRef(false);
   
   // Registration list states
   const [filterStatus, setFilterStatus] = useState("all"); // all, pending, paid, rejected
@@ -257,6 +260,24 @@ export default function AdminConsole() {
     }
   }, []);
 
+  // Sinkronisasi otomatis dashboard: pendaftar, status pembayaran, check-in, dan kuota.
+  // Polling 5 detik dipakai karena backend masih serverless tanpa websocket.
+  useEffect(() => {
+    if (!isLoggedIn) return undefined;
+    const refresh = () => {
+      if (!document.hidden) fetchDashboardData();
+    };
+    const interval = window.setInterval(refresh, 5000);
+    const onVisible = () => { if (!document.hidden) fetchDashboardData(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [isLoggedIn]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError("");
@@ -293,12 +314,16 @@ export default function AdminConsole() {
   };
 
   const fetchDashboardData = async () => {
+    if (syncInFlight.current) return;
+    syncInFlight.current = true;
     setLoadingData(true);
+    setSyncError("");
     try {
-      const headers = getAuthHeaders();
+      const headers = { ...getAuthHeaders(), "Cache-Control": "no-cache" };
+      const cacheBust = `?_sync=${Date.now()}`;
 
-      // 1. Fetch Registrations
-      const regRes = await fetch(`${API_BASE}/api/admin/registrations`, { headers });
+      // 1. Fetch Registrations (selalu ambil data terbaru dari server)
+      const regRes = await fetch(`${API_BASE}/api/admin/registrations${cacheBust}`, { headers, cache: "no-store" });
       if (regRes.status === 401 || regRes.status === 403) {
         handleLogout();
         setLoginError("Sesi login telah kadaluarsa. Silakan login kembali.");
@@ -308,7 +333,7 @@ export default function AdminConsole() {
       setRegistrations(regData);
 
       // 2. Fetch Packages (public, no auth needed)
-      const pkgRes = await fetch(`${API_BASE}/api/packages`);
+      const pkgRes = await fetch(`${API_BASE}/api/packages${cacheBust}`, { cache: "no-store" });
       const pkgData = await pkgRes.json();
       setPackages(pkgData);
 
@@ -323,8 +348,11 @@ export default function AdminConsole() {
       setUsers(userData);
     } catch (err) {
       console.error("Gagal memuat data dashboard:", err);
+      setSyncError("Sinkronisasi gagal. Data terakhir masih ditampilkan; mencoba lagi otomatis.");
     } finally {
+      setLastSyncedAt(new Date());
       setLoadingData(false);
+      syncInFlight.current = false;
     }
   };
 
@@ -782,9 +810,14 @@ Data tidak bisa dikembalikan.`)) return;
           <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>Kelola pembayaran, edit harga paket, generate voucher diskon, check-in e-tiket, dan kelola user akses.</p>
         </div>
         <div className="admin-header-actions" style={{ display: "flex", gap: "12px" }}>
-          <button className="btn btn-secondary" onClick={fetchDashboardData} style={{ padding: "10px 16px", borderRadius: "10px" }} disabled={loadingData}>
-            <RefreshCw size={16} className={loadingData ? "animate-spin" : ""} /> Refresh Data
-          </button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px" }}>
+            <button className="btn btn-secondary" onClick={fetchDashboardData} style={{ padding: "10px 16px", borderRadius: "10px" }} disabled={loadingData}>
+              <RefreshCw size={16} className={loadingData ? "animate-spin" : ""} /> {loadingData ? "Menyinkronkan..." : "Refresh Data"}
+            </button>
+            <span style={{ fontSize: "11px", color: syncError ? "#dc2626" : "var(--text-muted)" }}>
+              {syncError || (lastSyncedAt ? `Live · diperbarui ${lastSyncedAt.toLocaleTimeString("id-ID")}` : "Menghubungkan...")}
+            </span>
+          </div>
           <button className="btn btn-danger" onClick={handleLogout} style={{ padding: "10px 16px", borderRadius: "10px", fontSize: "14px" }}>
             Logout
           </button>
