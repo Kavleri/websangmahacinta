@@ -7,7 +7,7 @@ const MILESTONES = [
   { at: new Date("2026-08-21T00:00:00+07:00"), label: "Pembukaan War Tiket Reguler" },
   { at: new Date("2026-08-25T00:00:00+07:00"), label: "Pembukaan War Tiket Premium" },
   { at: new Date("2026-08-28T23:59:59+07:00"), label: "Penutupan Pendaftaran Tiket (Semua Kategori)" },
-  { at: new Date("2026-09-09T07:30:00+07:00"), label: "Hari Seminar Sang Maha Cinta" }
+  { at: new Date("2026-10-03T07:30:00+07:00"), label: "Hari Seminar Sang Maha Cinta" }
 ];
 
 function getNextMilestone(now) {
@@ -120,7 +120,7 @@ export default function Hero({ setPage }) {
                 </div>
                 <div>
                   <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 700 }}>TANGGAL</p>
-                  <p style={{ fontSize: "14px", fontWeight: 700 }}>Rabu, 09 September 2026</p>
+                  <p style={{ fontSize: "14px", fontWeight: 700 }}>Sabtu, 03 Oktober 2026</p>
                 </div>
               </div>
 

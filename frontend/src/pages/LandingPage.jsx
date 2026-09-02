@@ -393,7 +393,7 @@ export default function LandingPage({ onSelectPackage, setPage }) {
           }}>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>TANGGAL</p>
-              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Rabu, 09 September 2026</h4>
+              <h4 style={{ fontSize: "18px", color: "var(--color-primary)" }}>Sabtu, 03 Oktober 2026</h4>
             </div>
             <div className="glass-card" style={{ textAlign: "center", background: "rgba(255,255,255,0.7)", padding: "24px" }}>
               <p style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>WAKTU</p>
@@ -917,7 +917,7 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                     <span>💺 300 seat terbatas</span>
                     <span>🎤 3 narasumber pilihan</span>
                     <span>📍 Masjid At-Tohir, Depok</span>
-                    <span>🗓️ Rabu, 09 September 2026</span>
+                    <span>🗓️ Sabtu, 03 Oktober 2026</span>
                   </div>
                 </div>
               </section>

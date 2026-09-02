@@ -272,7 +272,7 @@ export default function StatusPage({ defaultQuery }) {
                             ) : null;
                           })()}
                           <div style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7, marginTop: "4px" }}>
-                            <Calendar size={12} /> <span>Rabu, 09 September 2026</span>
+                            <Calendar size={12} /> <span>Sabtu, 03 Oktober 2026</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "4px", opacity: 0.7 }}>
                             <Clock size={12} /> <span>07.30 - 15.00 WIB</span>

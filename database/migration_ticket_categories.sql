@@ -1,6 +1,6 @@
 -- =============================================================
 -- Migrasi Sistem Tiket 3 Kategori + War Tiket (Duta QU 2026)
--- Event: Seminar Sang Maha Cinta — Rabu, 09 September 2026
+-- Event: Seminar Sang Maha Cinta — Sabtu, 03 Oktober 2026
 -- Kuota: 100 seat per kategori (couple = 2 seat)
 -- Jadwal war (WIB = UTC+7):
 --   Economy : 17 - 20 Agustus 2026 (release 2026-08-16T17:00:00Z)
