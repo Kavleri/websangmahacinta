@@ -1471,3 +1471,89 @@ section[id] { scroll-margin-top: 92px; }
   }
 }
 
+
+/* Schedule announcement + Save the Date posters */
+.schedule-announcement-section {
+  padding: 42px 0 30px;
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.76), rgba(255, 255, 255, 0));
+}
+.schedule-poster-container {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 0.95fr);
+  align-items: center;
+  gap: 30px;
+  max-width: 980px;
+}
+.schedule-poster-copy h2,
+.save-date-copy h2 {
+  margin: 8px 0 10px;
+  color: var(--color-primary);
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: 1.16;
+}
+.schedule-poster-copy p,
+.save-date-copy p {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+.section-eyebrow {
+  display: inline-block;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+.schedule-poster-image,
+.save-date-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(12, 36, 80, 0.1);
+  box-shadow: 0 18px 42px rgba(12, 36, 80, 0.16);
+}
+.save-date-section {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 0.95fr);
+  align-items: center;
+  gap: 30px;
+  max-width: 980px;
+  margin: 70px auto 0;
+  padding: 0 0 16px;
+}
+.save-date-copy {
+  order: 2;
+  padding: 24px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(239, 246, 255, 0.8), rgba(255,255,255,0.95));
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+.save-date-image { order: 1; }
+
+@media (max-width: 700px) {
+  .schedule-announcement-section { padding: 28px 0 18px; }
+  .schedule-poster-container,
+  .save-date-section {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .schedule-poster-copy { text-align: center; }
+  .schedule-poster-copy h2,
+  .save-date-copy h2 { font-size: 26px; }
+  .schedule-poster-image,
+  .save-date-image { border-radius: 14px; }
+  .save-date-section {
+    margin-top: 48px;
+    padding: 0 12px 8px;
+  }
+  .save-date-copy {
+    order: 1;
+    text-align: center;
+    padding: 20px 16px;
+  }
+  .save-date-image { order: 2; }
+}

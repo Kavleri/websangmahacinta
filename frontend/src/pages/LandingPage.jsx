@@ -180,6 +180,22 @@ export default function LandingPage({ onSelectPackage, setPage }) {
     <div>
       <Hero setPage={setPage} />
 
+      {/* Pengumuman resmi perubahan jadwal */}
+      <section className="schedule-announcement-section" aria-labelledby="schedule-announcement-title">
+        <div className="container schedule-poster-container">
+          <div className="schedule-poster-copy">
+            <span className="section-eyebrow">Informasi penting</span>
+            <h2 id="schedule-announcement-title">Ada Penyesuaian Jadwal Acara</h2>
+            <p>Mohon catat tanggal terbaru seminar agar tidak terlewat.</p>
+          </div>
+          <img
+            src="/pengumuman-perubahan-jadwal.jpeg?v=20260902"
+            alt="Pengumuman perubahan jadwal Seminar Sang Maha Cinta menjadi Sabtu 3 Oktober 2026"
+            className="schedule-poster-image"
+          />
+        </div>
+      </section>
+
       {/* Tentang Seminar / Pain Points Section */}
       <section id="about-section" style={{ padding: "80px 0", background: "rgba(255, 255, 255, 0.4)", borderBottom: "1px solid rgba(12, 36, 80, 0.05)" }}>
         <div className="container">
@@ -893,6 +909,20 @@ export default function LandingPage({ onSelectPackage, setPage }) {
                   </div>
                 </div>
               </div>
+
+              {/* Pengingat tanggal terbaru sebelum CTA penutup */}
+              <section className="save-date-section" aria-labelledby="save-date-title">
+                <div className="save-date-copy">
+                  <span className="section-eyebrow">Save the date</span>
+                  <h2 id="save-date-title">Simpan Tanggal Terbarunya</h2>
+                  <p>Seminar Sang Maha Cinta — Menikah Untuk Bahagia</p>
+                </div>
+                <img
+                  src="/save-the-date.jpeg?v=20260902"
+                  alt="Save the Date Seminar Sang Maha Cinta, Sabtu 3 Oktober 2026"
+                  className="save-date-image"
+                />
+              </section>
 
               {/* ===== CTA Penutup ===== */}
               <section id="cta-section" style={{ marginTop: "88px", padding: "84px 0", background: "linear-gradient(135deg, #0c2450 0%, #153f8a 55%, #1d4ed8 100%)", borderRadius: "24px" }}>
