@@ -1,0 +1,256 @@
+{
+  "format": "DUTA-SECURE-BACKUP-10L-v1",
+  "created_utc": "2026-09-04",
+  "source": "web dutaqu",
+  "plaintext_archive": "web-dutaqu-source-sanitized.tar.gz",
+  "plaintext_archive_sha512": "511de6b8a86744860b11d8fe7db4f06c9816b41717f775148d627117d18b32c37342e8372a25773fe10b0c8468ed8782a97aa0594e048c14ac103d944c25873f",
+  "ciphertext": "web-dutaqu-source-10-layer.enc",
+  "ciphertext_sha512": "4fd5c41d2144844060eb067fb431c1b16d80f69f9111e0198c9f847c705b837540b8e392c06b524e265a0813527375f512872ca55c40fb2a97e3121116b1d97d",
+  "layer_count": 10,
+  "layers": [
+    {
+      "layer": 1,
+      "algorithm": "AES-256-GCM",
+      "decrypt_order": 10,
+      "nonce_b64": "n3OlKv6qp5CSqr4q",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=1|algorithm=AES-256-GCM",
+      "ciphertext_sha512_after_layer": "17e68d433df4461abf6b8881b55dd650fc56069b97c4eee5ad85ef177b10f2b41fccef9934c52601f471ee3e799ba0e645c2e6b2dbae672961ed3a610247768a"
+    },
+    {
+      "layer": 2,
+      "algorithm": "ChaCha20-Poly1305",
+      "decrypt_order": 9,
+      "nonce_b64": "wwZlAXrzGjITKJN8",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=2|algorithm=ChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "84ce7c6e02070304939f82e954dd61cbc5e08d2b7f032f5ede03775f04d419e569e2ab15130d6d77b221ab23922db87b584337bb46f6234ad66b176e2649a555"
+    },
+    {
+      "layer": 3,
+      "algorithm": "AES-256-GCM",
+      "decrypt_order": 8,
+      "nonce_b64": "Ii6RHtnfhpA1SHcD",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=3|algorithm=AES-256-GCM",
+      "ciphertext_sha512_after_layer": "f74d1b8e3afd4fa9cee4ca5b1c2d996cfaa16fc7bb92a35fddfae503339407148b69cc4c9c889115c4cde48949c2d8df6b98503e8ec958233f7384316df7902e"
+    },
+    {
+      "layer": 4,
+      "algorithm": "XChaCha20-Poly1305",
+      "decrypt_order": 7,
+      "nonce_b64": "asRanqdC6RFpRufPosdXnCNLt46z533U",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=4|algorithm=XChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "890b2c0fa0fdb295502c90536a7e33a2b2f0cc2c0766b35f18bb8d3aa1c9ca312e5a316ee8a3e667205b2b3443c17cfb2d6e5b230446ca7d9f2e5c1b46c18640"
+    },
+    {
+      "layer": 5,
+      "algorithm": "AES-256-GCM",
+      "decrypt_order": 6,
+      "nonce_b64": "enpXI1jWCoRcLxKl",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=5|algorithm=AES-256-GCM",
+      "ciphertext_sha512_after_layer": "915dd8983dc756ef82131b9244b9bd68f5e5a33b242a94e2094799a4bef5de9db4b1aa55bd073eaf2518589f2620bf758b8621cb47951f2509e19bc8b4cae94e"
+    },
+    {
+      "layer": 6,
+      "algorithm": "ChaCha20-Poly1305",
+      "decrypt_order": 5,
+      "nonce_b64": "GwMUX8QHkatqii+Q",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=6|algorithm=ChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "1a76fa0cbaf09922bbf4be47c460e99e00d1d8c78bf50dbb6d52da9d349aeb4eb262681c7ae7d73a9e370ab2b08cc81d1c059d37d5a6df8f1367a3dec289ec49"
+    },
+    {
+      "layer": 7,
+      "algorithm": "XChaCha20-Poly1305",
+      "decrypt_order": 4,
+      "nonce_b64": "8KcuHeGWgKxZ1JNFBg9ePF5waN/amAzI",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=7|algorithm=XChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "da7ffb53639ed94f255d381465e79218dbdd22d7f555b242d72d9078f02eec56e3e048fca5326750ff9ed5fb2fa15699137266891066af77f7108415a9cd9336"
+    },
+    {
+      "layer": 8,
+      "algorithm": "AES-256-GCM",
+      "decrypt_order": 3,
+      "nonce_b64": "c/0QY4JTgs15mpMH",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=8|algorithm=AES-256-GCM",
+      "ciphertext_sha512_after_layer": "fb193fb12e8fe14c8c0a80057557ef54aff708ec878a19a9b5f5c10cf2fb1c7896fd1467d9eca08279ee15edd8646980f3d7346b6d40a133e54ed4030bd5f580"
+    },
+    {
+      "layer": 9,
+      "algorithm": "ChaCha20-Poly1305",
+      "decrypt_order": 2,
+      "nonce_b64": "VSN2aYA/B26mr9CJ",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=9|algorithm=ChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "e0cc1097ece528c6e4e3bd09bbccee77947e2c480dd84599ebb6110be0a193fe30098d2d62fec19516781d18c9517b92073b9eed733a4c708a7a8af448496688"
+    },
+    {
+      "layer": 10,
+      "algorithm": "XChaCha20-Poly1305",
+      "decrypt_order": 1,
+      "nonce_b64": "7ldKcnN18HacD9cg4G0AKqqtg3zALNEm",
+      "aad": "DUTA-SECURE-BACKUP-v1|layer=10|algorithm=XChaCha20-Poly1305",
+      "ciphertext_sha512_after_layer": "4fd5c41d2144844060eb067fb431c1b16d80f69f9111e0198c9f847c705b837540b8e392c06b524e265a0813527375f512872ca55c40fb2a97e3121116b1d97d"
+    }
+  ],
+  "key_wrap": {
+    "scheme": "libsodium sealed box over Curve25519-converted GitHub SSH Ed25519 public keys",
+    "recipients": [
+      {
+        "github_user": "Kavleri",
+        "github_key_id": 148073581,
+        "ssh_public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHAHg3Qia2EV/9pVCTCbtS8ou0zxicg44MDT0inEb97U",
+        "curve25519_public_key_b64": "U68TIGDx9N2Rj8sHDsFtl7Hap/QBcMEtBOkGiMuhXAk="
+      },
+      {
+        "github_user": "Kavleri",
+        "github_key_id": 148073625,
+        "ssh_public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILJaP2KayoEVj/Zo7bsorBOeiqg31zRJhiHDF25ww7iK",
+        "curve25519_public_key_b64": "8O4I1HX2ABMc/gI2XsIcHnzpvc2uIeJGO7vTpxAKZzk="
+      }
+    ],
+    "wrapped_layer_keys": [
+      {
+        "layer": 1,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "y0MoDll+KEgwolQdCGBSVPFhbif9V7YjzeLsg+yaHQ6nWyW3W/YiACc6DrRhutFAgVV0SAEcbpPmtpDA7qHBt3Yjv4/5l+04/ovZRleGJQ8AzSg/aarGa0twzCKUWM5uVA=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "smhIxjPjqV8Vr6D8x4Wyk+GQu50yFvnDK1roi66KC0cmdzDfXvD+fZ2HDYL/h/cGRiXN0ysY+JVB9gvxcbo3xUPF+PRm4GmzV1rllKWERNhoreOkL3Yx26/wvz1CZ7Lehg=="
+          }
+        ]
+      },
+      {
+        "layer": 2,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "N1vlX+FVhyoRjGNKC33h/aJWzNLsJRwcpBO1/EYOOA8nAXhb61PnFncw8+wEKEt9GWYUH1h6vtGhi9uQcwP3FgU65Y9DpkeJBPlg6Ec+6C+SOH4i/EgaEyzrJ598bZA1Qw=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "Fy+z+Bd2bDww9Q0UZUjo1ZqW+YjqsVQomi54m1kFLn32jsqtGVwPG+4WruchC8kbX7SV9HnBDvFKI1ozFSMkBwilIjGrPuwrFQuHI44HnFA0J0eQR/slOHVlxrPo1jYMuQ=="
+          }
+        ]
+      },
+      {
+        "layer": 3,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "duv00QE2aDekk/bQmKsBArbzqqwr7ipFHfJAW/tcUmoGglzY59OEnbbtOETYq1JMf8wc7/AWIlAphjcrreIuGQoHIBMUy16QsPK3tht0s4OaYFKxIqy9XcO8FfLc7b/KxA=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "L5s9fewVTuUpFIzs9B73rIL8v0ST7iN/JoadXVxlA3EcwLD7O4S006WDarFl/AWguGTJuxkAM6qMS2Oyg9kI9W678FRxrRkFmtnsSApNgOWPeA/RBXrZLB0PBTpFFGgWAw=="
+          }
+        ]
+      },
+      {
+        "layer": 4,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "gRzIsev1+EQw3CyIZsZkhOYBMOA+CDchOkdzH0vKhTpj2bOD3eUXKbpFW6UCAiaHLKc74xSh0blQOzaSYnfsVyHV9OA+c2PhUfdHqXfH8QC9/VKPH/NiZVIC0knHFejgOw=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "3b53tPm4j1YWG2P4v4t5k2gVUIxi2CowXGVm1y57Tjs6/DRLScRinWxxAPLMKpQ5Xj7zS1+KH7je0knULsKMZ9JqBLUCYOoRKFVg+5B7vmt5qmMTKzQpHL1jClGul2wq/A=="
+          }
+        ]
+      },
+      {
+        "layer": 5,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "u0EmW0oUBzauHbDbQ3CzZffv+eaP6UVr3fS9h1uP0nL317B0DihrYMdSNCXOcZFPPkAQTY8jmTl4qQLweTyjCa71V/CGTTFXPqZEGSmd7ZpYSJ5GUOmbS6jTJoXOzy4W+A=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "Y/6FekmnzxnmnwgAHne/axr5NVWv08vRScFpMSWa7X847y/MeXhNlq47ewMwKkUjapeiW1sgqoeBMWdE5ZTnO34I43mXWCWZMaXf/NPxtQo8v5ggC6rCFI+m7/cnv5ynJg=="
+          }
+        ]
+      },
+      {
+        "layer": 6,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "qUvYvpw/5aFCuVU4HiTM9LhbW254MkcegW5Xe/xBS2btoCMuvyJXdh9ryQq7DhFSuK1Y4PlcCu0WWaY86Molv25VGNSRdgoLsDfWrqpatExfeWiffuhzKy6dEWviwNvHYQ=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "si1k7bsFsq0hy1ZoBFi207iEK1y7cJspr0/vor86bS2O6UGzi6bznmCqtaAW50zS0wl8ocN42zAvHL2DtWlqTBxO4VHeaimyVNzM6coiU+p5kNWkLrmP6GixeqqKwcjlmg=="
+          }
+        ]
+      },
+      {
+        "layer": 7,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "E2cWBnn1AD3k9LIUEDLaNU2L0/V3vS+AMQ3q2AbuuzGQyNNMKBxOuh2MaCRYF80GuWH6MOxLua643FLBhYjaxUS4C+e4JZTR1uyn1UfNwyFUXMgGg120CKEtEay5HMiKAA=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "PdvxGiE5l8NuCYuaeNCn/hnTswVFVvt6cuoy751IJyNshvceBf22xIW45GsSNT0WhMrvtscV3A36qd/fb0bNj28dAl4/NK9cw2bGOLT11ZXFu6u0ns9YHow9xNOvvyPFcQ=="
+          }
+        ]
+      },
+      {
+        "layer": 8,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "ho8FFABqNcGOWaQ2cOhPEeUDjafmyE3Tj61RU1JBHHuDEHw/RXdMAwenUrJBMMIPDqX/ALNx33KLKU/Lt8FQQYgkkNR4BT0t4n+ALGIaMBF5URto+HE3GhTm0X7Ihf9qrQ=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "UCVgAKzs8PyPPV+SstAq7Ei/rjzi2TaLrKnE8Z5B9Q/Hs23/EbRK9eDMiBbyB0+0ThwbCios+b+Kj/7iicXZkI2Y4pGxN/kuAaVVA3RijRaprjQFwRnY8qUIIgHtDD2njA=="
+          }
+        ]
+      },
+      {
+        "layer": 9,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "F1Ljti3b5scF6unxJPQVaBcKtWe+UV6MCiq7xUbvl3tqMfOfj9twwbWy8vuZP3HDWe7RscoijKY3YaJdV+Jx33nJhO1epEJyyRxNGpEDOHh8mT6l63MdyggzIBoSOWK1xw=="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "A0chLsShacj2uZQIggIJ2m0d1IlrPo6So+X6Xu/tS0uby09ZFUCEwa1l1UoYRZo6XuiN6fxjW4tO/c3HtqjfO1cfuBfnEgvNLNp0Hk+pQxwrmUh9lHBPRWxpHvDaTwEdNg=="
+          }
+        ]
+      },
+      {
+        "layer": 10,
+        "recipients": [
+          {
+            "github_key_id": 148073581,
+            "wrapped_key_b64": "joy9W859tc0RPda/smSN234K8HkKlnxDqbjU+3Wabkzth1foSlvAjRaONtGTgftrbFvPaVcDxxGAPGlSfu8vsC29xywgoDRRwmSgj7gV249DPUo0hRd9n+E0sy3fgIebOeo="
+          },
+          {
+            "github_key_id": 148073625,
+            "wrapped_key_b64": "tVVHh0hRYa2rPfbSOtsEAwFcpFz9QNTlUlbAO8RL4yPtnYUP2CTUOrtoGjUAOXtIAx/A0PoJUaaI4bGyglE1UHgjv7nA9SPruKValsD162Lmadq7132AGxB8Zef4IIQ1rfU="
+          }
+        ]
+      }
+    ],
+    "note": "The matching Kavleri SSH private key is required to unwrap a layer key. No private key or passphrase is stored here."
+  },
+  "safety": {
+    "excluded": [
+      ".env*",
+      "node_modules",
+      "dist",
+      ".next",
+      ".vercel",
+      "db_fallback.json",
+      "logs",
+      "archives",
+      "production uploads"
+    ],
+    "plaintext_secret_scan": "passed"
+  }
+}
